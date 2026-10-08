@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="sv" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextWeek - Ditt Veckoschema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a',
+                        cardbg: '#1e293b',
+                        accent: '#6366f1'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/30">
+                <i class="fa-solid fa-calendar-week text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-tight text-white">NextWeek</h1>
+                <p class="text-xs text-slate-400">Ditt smarta veckoschema</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-sm font-medium transition shadow-md shadow-indigo-600/20 flex items-center space-x-1.5">
+                <i class="fa-solid fa-plus"></i>
+                <span>Lägg till</span>
+            </button>
+            <button onclick="clearAllItems()" class="p-2 bg-slate-800 hover:bg-red-900/40 text-slate-400 hover:text-red-400 rounded-xl transition" title="Rensa alla">
+                <i class="fa-solid fa-trash-can text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 flex flex-col gap-4">
+        <div class="flex flex-col sm:flex-row items-center justify-between bg-slate-900/60 p-3 rounded-2xl border border-slate-800/80 gap-3">
+            <div class="flex items-center space-x-2">
+                <button onclick="changeWeek(-1)" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+                    <i class="fa-solid fa-chevron-left text-sm"></i>
+                </button>
+                <span id="currentWeekRange" class="font-semibold text-sm sm:text-base text-slate-200 px-2 min-w-[200px] text-center">Väger vecka...</span>
+                <button onclick="changeWeek(1)" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                </button>
+            </div>
+            <button onclick="goToCurrentWeek()" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 bg-indigo-950/50 hover:bg-indigo-900/50 border border-indigo-800/50 px-3 py-1.5 rounded-xl transition">
+                Gå till aktuell vecka
+            </button>
+        </div>
+
+        <div id="weekGrid" class="grid grid-cols-1 md:grid-cols-7 gap-3 flex-1">
+            <!-- Dynamically populated days -->
+        </div>
+    </main>
+
+    <div id="addModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative">
+            <button onclick="closeAddModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <h2 class="text-xl font-bold text-white mb-4 flex items-center space-x-2">
+                <i class="fa-solid fa-plus-circle text-indigo-500"></i>
+                <span>Lägg till i schema</span>
+            </h2>
+
+            <div class="flex border-b border-slate-800 mb-4">
+                <button onclick="switchTab('sport')" id="tabSportBtn" class="flex-1 pb-3 font-semibold text-sm border-b-2 border-indigo-500 text-indigo-400 transition">Sportlag (30 dagar)</button>
+                <button onclick="switchTab('tmdb')" id="tabTmdbBtn" class="flex-1 pb-3 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">Film / Serie (TMDB)</button>
+                <button onclick="switchTab('custom')" id="tabCustomBtn" class="flex-1 pb-3 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">Egen händelse</button>
+            </div>
+
+            <!-- Sport Tab (30 days limit) -->
+            <div id="sportTab" class="space-y-4">
+                <p class="text-xs text-slate-400">Välj ett lag. Systemet hämtar automatiskt matcher för den kommande månaden (30 dagar framåt från idag).</p>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Välj lag eller turnering</label>
+                    <select id="teamSelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="arsenal">Arsenal (Premier League)</option>
+                        <option value="liverpool">Liverpool (Premier League)</option>
+                        <option value="nets">Brooklyn Nets (NBA)</option>
+                        <option value="hammarby">Hammarby IF (Allsvenskan)</option>
+                    </select>
+                </div>
+                <button onclick="addSportTeam()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl text-sm transition shadow-lg shadow-indigo-600/20">
+                    Lägg till kommande månadens matcher
+                </button>
+            </div>
+
+            <!-- TMDB Tab -->
+            <div id="tmdbTab" class="space-y-4 hidden">
+                <p class="text-xs text-slate-400">Sök efter filmer eller TV-serier via TMDB.</p>
+                <div class="flex space-x-2">
+                    <input type="text" id="tmdbQuery" placeholder="T.ex. Stranger Things, Interstellar..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                    <button onclick="searchTmdb()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm transition">Sök</button>
+                </div>
+                <div id="tmdbResults" class="max-h-60 overflow-y-auto space-y-2 pr-1 hide-scrollbar">
+                    <!-- Results rendered here -->
+                </div>
+            </div>
+
+            <!-- Custom Event Tab -->
+            <div id="customTab" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Titel</label>
+                    <input type="text" id="customTitle" placeholder="T.ex. Födelsedagsmiddag, Träning..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Datum</label>
+                        <input type="date" id="customDate" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Tid</label>
+                        <input type="time" id="customTime" value="20:00" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Kategori / Ikon</label>
+                    <select id="customCategory" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="fa-solid fa-calendar-day">Allmänt</option>
+                        <option value="fa-solid fa-futbol">Sport</option>
+                        <option value="fa-solid fa-film">Film / Serie</option>
+                        <option value="fa-solid fa-gamepad">Spel</option>
+                    </select>
+                </div>
+                <button onclick="addCustomEvent()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl text-sm transition shadow-lg shadow-indigo-600/20">
+                    Spara händelse
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+            <div id="messageIcon" class="w-12 h-12 bg-indigo-600/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-info"></i>
+            </div>
+            <h3 id="messageTitle" class="font-bold text-lg text-white">Meddelande</h3>
+            <p id="messageText" class="text-sm text-slate-300">Här är ett meddelande.</p>
+            <button onclick="closeMessageBox()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-xl text-sm font-medium transition">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentDate = new Date('2026-10-04'); // Fastställt nutidsdatum
+        let weekOffset = 0;
+        let items = JSON.parse(localStorage.getItem('nextweek_items') || '[]');
+
+        // Initialize App on load
+        window.onload = function() {
+            renderWeek();
+            // Set default date in custom modal to today
+            document.getElementById('customDate').value = formatDateIso(currentDate);
+        };
+
+        function showMessage(title, text) {
+            document.getElementById('messageTitle').innerText = title;
+            document.getElementById('messageText').innerText = text;
+            document.getElementById('messageModal').classList.remove('hidden');
+        }
+
+        function closeMessageBox() {
+            document.getElementById('messageModal').classList.add('hidden');
+        }
+
+        // Date helpers
+        function formatDateIso(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function getStartOfWeek(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+            return new Date(d.setDate(diff));
+        }
+
+        function changeWeek(direction) {
+            weekOffset += direction;
+            renderWeek();
+        }
+
+        function goToCurrentWeek() {
+            weekOffset = 0;
+            renderWeek();
+        }
+
+        // Render Week View
+        function renderWeek() {
+            const grid = document.getElementById('weekGrid');
+            grid.innerHTML = '';
+
+            const startOfWeek = getStartOfWeek(currentDate);
+            startOfWeek.setDate(startOfWeek.getDate() + (weekOffset * 7));
+
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(endOfWeek.getDate() + 6);
+
+            // Update week range header label
+            const options = { month: 'short', day: 'numeric' };
+            document.getElementById('currentWeekRange').innerText = 
+                `${startOfWeek.toLocaleDateString('sv-SE', options)} – ${endOfWeek.toLocaleDateString('sv-SE', options)}`;
+
+            const dayNames = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag'];
+
+            for (let i = 0; i < 7; i++) {
+                const currentDay = new Date(startOfWeek);
+                currentDay.setDate(currentDay.getDate() + i);
+                const dateIso = formatDateIso(currentDay);
+                const isToday = dateIso === formatDateIso(new Date('2026-10-04'));
+
+                const col = document.createElement('div');
+                col.className = `bg-slate-900/40 border ${isToday ? 'border-indigo-500/60 bg-indigo-950/10' : 'border-slate-800/80'} rounded-2xl p-3 flex flex-col min-h-[350px] transition`;
+                
+                // Drag and drop event listeners
+                col.ondragover = (e) => e.preventDefault();
+                col.ondrop = (e) => {
+                    e.preventDefault();
+                    const itemId = e.dataTransfer.getData('text/plain');
+                    updateItemDate(itemId, dateIso);
+                };
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'flex items-center justify-between pb-3 mb-2 border-b border-slate-800/60';
+                headerDiv.innerHTML = `
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider ${isToday ? 'text-indigo-400' : 'text-slate-400'}">${dayNames[i]}</span>
+                        <div class="text-sm font-semibold text-slate-200">${currentDay.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}</div>
+                    </div>
+                    ${isToday ? '<span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full font-medium">Idag</span>' : ''}
+                `;
+                col.appendChild(headerDiv);
+
+                const itemsContainer = document.createElement('div');
+                itemsContainer.className = 'flex-1 space-y-2 overflow-y-auto';
+
+                // Filter items for this day
+                const dayItems = items.filter(item => item.date === dateIso);
+                dayItems.sort((a, b) => (a.time || '00:00').localeCompare(b.time || '00:00'));
+
+                if (dayItems.length === 0) {
+                    itemsContainer.innerHTML = `<div class="h-full flex items-center justify-center text-slate-600 text-xs italic py-8">Inga händelser</div>`;
+                } else {
+                    dayItems.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 rounded-xl p-2.5 text-xs shadow-sm relative group cursor-grab active:cursor-grabbing transition';
+                        card.draggable = true;
+                        card.ondragstart = (e) => {
+                            e.dataTransfer.setData('text/plain', item.id);
+                        };
+
+                        card.innerHTML = `
+                            <div class="flex items-start justify-between gap-1">
+                                <div class="flex items-center space-x-1.5 font-medium text-slate-200">
+                                    <i class="${item.icon || 'fa-solid fa-circle'} text-indigo-400 text-[10px]"></i>
+                                    <span class="truncate">${item.title}</span>
+                                </div>
+                                <button onclick="deleteItem('${item.id}')" class="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition p-0.5">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between mt-2 text-[10px] text-slate-400">
+                                <span><i class="fa-regular fa-clock mr-1"></i>${item.time || 'Tid ej satt'}</span>
+                                <button onclick="openChangeDateModal('${item.id}')" class="hover:text-indigo-400 underline">Ändra datum</button>
+                            </div>
+                        `;
+                        itemsContainer.appendChild(card);
+                    });
+                }
+
+                col.appendChild(itemsContainer);
+                grid.appendChild(col);
+            }
+        }
+
+        // Modal Management
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+
+        function switchTab(tab) {
+            document.getElementById('sportTab').classList.add('hidden');
+            document.getElementById('tmdbTab').classList.add('hidden');
+            document.getElementById('customTab').classList.add('hidden');
+
+            document.getElementById('tabSportBtn').className = 'flex-1 pb-3 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition';
+            document.getElementById('tabTmdbBtn').className = 'flex-1 pb-3 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition';
+            document.getElementById('tabCustomBtn').className = 'flex-1 pb-3 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition';
+
+            if (tab === 'sport') {
+                document.getElementById('sportTab').classList.remove('hidden');
+                document.getElementById('tabSportBtn').className = 'flex-1 pb-3 font-semibold text-sm border-b-2 border-indigo-500 text-indigo-400 transition';
+            } else if (tab === 'tmdb') {
+                document.getElementById('tmdbTab').classList.remove('hidden');
+                document.getElementById('tabTmdbBtn').className = 'flex-1 pb-3 font-semibold text-sm border-b-2 border-indigo-500 text-indigo-400 transition';
+            } else if (tab === 'custom') {
+                document.getElementById('customTab').classList.remove('hidden');
+                document.getElementById('tabCustomBtn').className = 'flex-1 pb-3 font-semibold text-sm border-b-2 border-indigo-500 text-indigo-400 transition';
+            }
+        }
+
+        // Add Sport Team filtered strictly to 30 days ahead (from 2026-10-04)
+        function addSportTeam() {
+            const teamKey = document.getElementById('teamSelect').value;
+            let teamName = '';
+            
+            // Mock matchgenerator för kommande matcher utställda på olika datum
+            const baseTimeBase = new Date('2026-10-04');
+            const maxDaysAhead = 30; // Begränsning till kommande månad
+            
+            let mockMatches = [];
+            if (teamKey === 'arsenal') {
+                teamName = 'Arsenal';
+                mockMatches = [
+                    { days: 2, opponent: 'Arsenal vs Chelsea', time: '18:30' },
+                    { days: 9, opponent: 'Brighton vs Arsenal', time: '16:00' },
+                    { days: 16, opponent: 'Arsenal vs Tottenham', time: '15:00' },
+                    { days: 23, opponent: 'Aston Villa vs Arsenal', time: '20:00' },
+                    { days: 28, opponent: 'Arsenal vs Manchester United', time: '17:30' }
+                ];
+            } else if (teamKey === 'liverpool') {
+                teamName = 'Liverpool';
+                mockMatches = [
+                    { days: 3, opponent: 'Liverpool vs Everton', time: '13:30' },
+                    { days: 10, opponent: 'Manchester City vs Liverpool', time: '17:30' },
+                    { days: 17, opponent: 'Liverpool vs Chelsea', time: '16:00' },
+                    { days: 24, opponent: 'Newcastle vs Liverpool', time: '15:00' },
+                    { days: 29, opponent: 'Liverpool vs West Ham', time: '21:00' }
+                ];
+            } else if (teamKey === 'nets') {
+                teamName = 'Brooklyn Nets';
+                mockMatches = [
+                    { days: 4, opponent: 'Nets vs Celtics', time: '01:30' },
+                    { days: 11, opponent: 'Knicks vs Nets', time: '01:00' },
+                    { days: 18, opponent: 'Nets vs Heat', time: '01:30' },
+                    { days: 25, opponent: 'Bulls vs Nets', time: '02:00' }
+                ];
+            } else if (teamKey === 'hammarby') {
+                teamName = 'Hammarby IF';
+                mockMatches = [
+                    { days: 5, opponent: 'AIK vs Hammarby', time: '19:00' },
+                    { days: 12, opponent: 'Hammarby vs Djurgården', time: '15:00' },
+                    { days: 19, opponent: 'Malmö FF vs Hammarby', time: '17:30' },
+                    { days: 26, opponent: 'Hammarby vs Elfsborg', time: '14:00' }
+                ];
+            }
+
+            let addedCount = 0;
+            mockMatches.forEach(m => {
+                if (m.days <= maxDaysAhead) {
+                    const matchDate = new Date(baseTimeBase);
+                    matchDate.setDate(matchDate.getDate() + m.days);
+                    
+                    items.push({
+                        id: 'item_' + Math.random().toString(36.substr(2, 9)),
+                        title: m.opponent,
+                        date: formatDateIso(matchDate),
+                        time: m.time,
+                        icon: 'fa-solid fa-futbol'
+                    });
+                    addedCount++;
+                }
+            });
+
+            saveAndRefresh();
+            closeAddModal();
+            showMessage('Lag tillagt', `Lade till ${addedCount} matcher för ${teamName} (kommande 30 dagarna).`);
+        }
+
+        // TMDB Search Simulation
+        function searchTmdb() {
+            const query = document.getElementById('tmdbQuery').value.trim();
+            const resultsContainer = document.getElementById('tmdbResults');
+            resultsContainer.innerHTML = '';
+
+            if (!query) {
+                resultsContainer.innerHTML = `<p class="text-xs text-slate-500">Skriv in ett sökord först.</p>`;
+                return;
+            }
+
+            // Simulerade resultat baserat på sökning
+            const mockResults = [
+                { title: `${query} - Säsong 1, Avsnitt 1`, type: 'Serie' },
+                { title: `${query} - Säsong 1, Avsnitt 2`, type: 'Serie' },
+                { title: `${query} (Filmpremiär)`, type: 'Film' }
+            ];
+
+            mockResults.forEach((res, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'bg-slate-800 hover:bg-slate-700/80 p-2.5 rounded-xl flex items-center justify-between text-xs transition cursor-pointer';
+                
+                const futureDate = new Date('2026-10-04');
+                futureDate.setDate(futureDate.getDate() + (index + 1) * 2);
+
+                itemDiv.innerHTML = `
+                    <div>
+                        <span class="font-medium text-slate-200 block">${res.title}</span>
+                        <span class="text-[10px] text-slate-400">Planeras: ${formatDateIso(futureDate)}</span>
+                    </div>
+                    <button class="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 rounded-lg text-[10px]">Lägg till</button>
+                `;
+
+                itemDiv.onclick = () => {
+                    items.push({
+                        id: 'item_' + Math.random().toString(36.substr(2, 9)),
+                        title: res.title,
+                        date: formatDateIso(futureDate),
+                        time: '21:00',
+                        icon: 'fa-solid fa-film'
+                    });
+                    saveAndRefresh();
+                    closeAddModal();
+                    showMessage('Tillagt i schema', `"${res.title}" har lagts till i ditt schema.`);
+                };
+
+                resultsContainer.appendChild(itemDiv);
+            });
+        }
+
+        // Add Custom Event
+        function addCustomEvent() {
+            const title = document.getElementById('customTitle').value.trim();
+            const date = document.getElementById('customDate').value;
+            const time = document.getElementById('customTime').value;
+            const icon = document.getElementById('customCategory').value;
+
+            if (!title || !date) {
+                showMessage('Ofullständigt', 'Vänligen fyll i titel och datum.');
+                return;
+            }
+
+            items.push({
+                id: 'item_' + Math.random().toString(36.substr(2, 9)),
+                title,
+                date,
+                time,
+                icon
+            });
+
+            saveAndRefresh();
+            closeAddModal();
+            document.getElementById('customTitle').value = '';
+            showMessage('Skapat', 'Din händelse har sparats i schemat.');
+        }
+
+        // Item manipulation helpers
+        function deleteItem(id) {
+            items = items.filter(i => i.id !== id);
+            saveAndRefresh();
+        }
+
+        function updateItemDate(id, newDate) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.date = newDate;
+                saveAndRefresh();
+            }
+        }
+
+        function openChangeDateModal(id) {
+            const newDateStr = prompt('Ange nytt datum (ÅÅÅÅ-MM-DD):', formatDateIso(new Date('2026-10-04')));
+            if (newDateStr) {
+                updateItemDate(id, newDateStr);
+            }
+        }
+
+        function clearAllItems() {
+            if (confirm('Är du säker på att du vill rensa hela schemat?')) {
+                items = [];
+                saveAndRefresh();
+            }
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('nextweek_items', JSON.stringify(items));
+            renderWeek();
+        }
+    </script>
+</body>
+</html>
