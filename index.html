@@ -25,9 +25,27 @@
         }
 
         .logo-area { display: flex; align-items: center; gap: 12px; }
-        .logo-icon { width: 36px; height: 36px; background-color: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; color: white; }
-        .brand-title { font-size: 18px; font-weight: 700; }
-        .brand-sub { font-size: 12px; color: var(--text-muted); }
+        
+        /* Kalender-ikonen i toppen */
+        .custom-logo-icon {
+            width: 42px; height: 42px; background: #000; border-radius: 10px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 6px; position: relative; overflow: hidden; border: 1px solid #222;
+        }
+        .cli-top { display: flex; justify-content: space-around; width: 100%; }
+        .cli-peg { width: 6px; height: 5px; background: #fff; border-radius: 3px; }
+        .cli-body { background: #fff; border-radius: 6px; flex: 1; padding: 4px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; position: relative; }
+        .cli-dot { background: #ccc; border-radius: 1px; height: 5px; }
+        .cli-dot.red { background: var(--accent); }
+        .cli-nw { position: absolute; bottom: 2px; right: 3px; font-weight: 900; font-size: 11px; color: var(--accent); font-style: italic; letter-spacing: -0.5px; }
+
+        /* NextWeek typsnittslogotyp */
+        .brand-text-logo {
+            font-size: 22px; font-weight: 800; font-style: italic; letter-spacing: -0.5px;
+            display: flex; align-items: baseline; line-height: 1;
+        }
+        .brand-text-next { color: #ffffff; }
+        .brand-text-week { color: var(--accent); }
 
         .search-btn {
             background-color: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted);
@@ -69,7 +87,6 @@
         }
         .day-card { display: block; transition: border-color 0.2s; }
         .day-card.is-today { border-color: rgba(255, 59, 48, 0.6); }
-        .day-card.drag-over { border-color: var(--accent); background-color: var(--card-hover); }
 
         .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .day-title { font-size: 15px; font-weight: 700; }
@@ -87,11 +104,8 @@
         .item {
             background-color: #161f30; border: 1px solid var(--border); border-radius: 12px;
             padding: 12px; display: flex; align-items: flex-start; justify-content: space-between; margin-top: 8px;
-            cursor: grab; user-select: none; position: relative;
+            user-select: none; position: relative;
         }
-        .item:active { cursor: grabbing; }
-        .item.dragging { opacity: 0.4; }
-
         .item-content { flex: 1; }
         
         /* Treprickarsmeny */
@@ -102,7 +116,7 @@
         .dropdown-menu {
             display: none; position: absolute; right: 0; top: 24px;
             background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4); z-index: 50; width: 160px; overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4); z-index: 50; width: 190px; overflow: hidden;
         }
         .dropdown-menu.show { display: block; }
         
@@ -113,7 +127,6 @@
         .dropdown-item:last-child { border-bottom: none; color: var(--accent); }
         .dropdown-item:hover { background: var(--card-hover); }
 
-        /* Dold datumväljare som aktiveras via "Annan dag" */
         .dropdown-date-input {
             display: none; width: calc(100% - 20px); margin: 6px 10px 10px 10px;
             padding: 6px; background: var(--bg-color); border: 1px solid var(--border);
@@ -121,19 +134,48 @@
         }
         .dropdown-date-input.show { display: block; }
 
+        .sub-days-menu {
+            display: none; background: var(--card-hover); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+        }
+        .sub-days-menu.show { display: block; }
+        .sub-day-btn {
+            padding: 8px 16px; font-size: 12px; color: var(--text-muted); background: none; border: none;
+            width: 100%; text-align: left; cursor: pointer; display: block; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .sub-day-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.03); }
+
         .badge { background: rgba(255, 59, 48, 0.2); color: #ff6b63; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
         .empty-day { color: var(--text-muted); font-size: 13px; text-align: center; padding: 10px 0; font-style: italic; }
 
         .lk { color: var(--accent); cursor: pointer; text-decoration: none; border: none; background: none; font-size: 14px; text-align: left; padding: 0; }
         .lk:hover { text-decoration: underline; }
 
+        /* Bottennavigering med dina tre nya ikoner[cite: 5] */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background-color: rgba(11, 15, 23, 0.95); backdrop-filter: blur(10px);
-            border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100;
+            border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 8px 0; z-index: 100;
         }
-        .nav-item { background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; cursor: pointer; }
+        .nav-item { background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; cursor: pointer; padding: 4px 16px; }
         .nav-item.active { color: var(--accent); }
+        .nav-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+
+        /* CSS-version av dina bottenikoner[cite: 5] */
+        .nav-cal { width: 22px; height: 22px; background: #0b0f17; border: 2px solid currentColor; border-radius: 5px; position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: 3px; }
+        .nc-top { display: flex; justify-content: space-between; width: 100%; }
+        .nc-peg { width: 3px; height: 3px; background: currentColor; border-radius: 1px; }
+        .nc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; flex: 1; background: currentColor; padding: 1px; border-radius: 2px; }
+        .nc-cell { background: #0b0f17; border-radius: 1px; }
+        .nc-cell.red { background: var(--accent); }
+
+        .nav-ball { width: 22px; height: 22px; border: 2px solid currentColor; border-radius: 50%; position: relative; overflow: hidden; background: #0b0f17; }
+        .nb-patch { position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: var(--accent); clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+
+        .nav-heart { width: 22px; height: 20px; position: relative; display: flex; align-items: center; justify-content: center; }
+        .nav-heart::before, .nav-heart::after { content: ""; position: absolute; top: 0; width: 12px; height: 18px; border-radius: 10px 10px 0 0; background: currentColor; }
+        .nav-heart::before { left: 11px; transform: rotate(-45deg); transform-origin: 0 100%; }
+        .nav-heart::after { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
+
         h3 { margin: 16px 0 6px; font-size: 13px; color: var(--text-muted); text-transform: uppercase; }
         .round-header { font-size: 14px; font-weight: 700; color: var(--accent); margin: 16px 0 8px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
     </style>
@@ -142,10 +184,30 @@
 
     <header>
         <div class="logo-area">
-            <div class="logo-icon">📅</div>
-            <div>
-                <h1 class="brand-title">NextWeek</h1>
-                <span class="brand-sub">Veckoöversikt & Sport</span>
+            <!-- Kalender-ikonen med NW -->
+            <div class="custom-logo-icon">
+                <div class="cli-top">
+                    <div class="cli-peg"></div>
+                    <div class="cli-peg"></div>
+                </div>
+                <div class="cli-body">
+                    <div class="cli-dot"></div>
+                    <div class="cli-dot"></div>
+                    <div class="cli-dot"></div>
+                    <div class="cli-dot"></div>
+                    <div class="cli-dot"></div>
+                    <div class="cli-dot"></div>
+                    <div class="cli-dot red"></div>
+                    <div class="cli-dot"></div>
+                    <div class="cli-dot"></div>
+                    <div class="cli-dot"></div>
+                    <div class="cli-dot"></div>
+                    <span class="cli-nw">NW</span>
+                </div>
+            </div>
+            <!-- NextWeek typsnittslogotyp -->
+            <div class="brand-text-logo">
+                <span class="brand-text-next">Next</span><span class="brand-text-week">Week</span>
             </div>
         </div>
         <div>
@@ -157,7 +219,7 @@
     <div id="search-modal">
         <div class="search-content-wrapper" id="search-content-wrapper">
             <div class="search-header-row">
-                <input type="text" id="modal-search-input" placeholder="Sök lag, liga, serie eller film (t.ex. Ars, Dun, Dar)..." autofocus>
+                <input type="text" id="modal-search-input" placeholder="Sök lag, liga, serie eller film (t.ex. Arsenal, Dune)..." autofocus>
                 <button class="close-search-btn" id="close-search-modal">Avbryt</button>
             </div>
             <div class="search-results-box" id="modal-search-results">
@@ -170,15 +232,29 @@
 
     <nav class="bottom-nav">
         <button class="nav-item" data-tab="vecka">
-            <span style="font-size: 20px;">📅</span>
+            <div class="nav-icon">
+                <div class="nav-cal">
+                    <div class="nc-top"><div class="nc-peg"></div><div class="nc-peg"></div></div>
+                    <div class="nc-grid">
+                        <div class="nc-cell"></div><div class="nc-cell"></div><div class="nc-cell"></div>
+                        <div class="nc-cell"></div><div class="nc-cell red"></div><div class="nc-cell"></div>
+                    </div>
+                </div>
+            </div>
             <span>Vecka</span>
         </button>
         <button class="nav-item" data-tab="sport">
-            <span style="font-size: 20px;">⚽</span>
+            <div class="nav-icon">
+                <div class="nav-ball">
+                    <div class="nb-patch"></div>
+                </div>
+            </div>
             <span>Sport</span>
         </button>
         <button class="nav-item" data-tab="favoriter">
-            <span style="font-size: 20px;">❤️</span>
+            <div class="nav-icon">
+                <div class="nav-heart"></div>
+            </div>
             <span>Favoriter</span>
         </button>
     </nav>
@@ -197,38 +273,7 @@
             { id: 'f1', name: 'F1', icon: '🏎️', tv: 'Viaplay · V Sport F1', teams: [] }
         ];
 
-        const FX = [];
-        const T_BASE = new Date('2026-10-09');
-        const TM_SLOTS = ['13:30', '15:00', '16:00', '18:30', '21:00'];
-
-        LG.forEach(l => {
-            if (!l.teams.length) {
-                for (let r = 6; r <= 24; r++) {
-                    let d = new Date(T_BASE);
-                    d.setDate(d.getDate() + ((r - 6) * 7));
-                    FX.push({ lg: l.id, round: r, d: d.toISOString().split('T')[0], t: '15:00', h: `Grand Prix ${r}`, a: '', c: l.tv });
-                }
-                return;
-            }
-
-            for (let r = 6; r <= 38; r++) {
-                let shuffled = [...l.teams].sort(() => ((r * 13) % 7) - 3);
-                for (let i = 0; i < shuffled.length - 1; i += 2) {
-                    let d = new Date(T_BASE);
-                    d.setDate(d.getDate() + ((r - 6) * 7) + (i % 2));
-                    FX.push({
-                        lg: l.id,
-                        round: r,
-                        d: d.toISOString().split('T')[0],
-                        t: TM_SLOTS[(i + r) % TM_SLOTS.length],
-                        h: shuffled[i],
-                        a: shuffled[i+1],
-                        c: l.tv
-                    });
-                }
-            }
-        });
-
+        let FX = [];
         let cal = [{ id: 1, ic: '⚽', t: 'Arsenal – Chelsea', s: 'Prime Video · 13:30', d: '2026-10-10' }];
         let currentTab = 'vecka';
         let activeLeague = null;
@@ -244,6 +289,39 @@
             let month = String(date.getMonth() + 1).padStart(2, '0');
             let day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+
+        async function fetchLiveSportsData() {
+            try {
+                const res = await fetch('https://api.openligadb.de/getmatchdata/bl1/2026');
+                const data = await res.json();
+                if (data && Array.isArray(data) && data.length > 0) {
+                    FX = data.map(m => ({
+                        lg: 'bl',
+                        round: m.group?.groupOrderID || 1,
+                        d: m.matchDateTime ? m.matchDateTime.split('T')[0] : '2026-10-10',
+                        t: m.matchDateTime ? m.matchDateTime.split('T')[1].substring(0,5) : '15:00',
+                        h: m.team1?.teamName || 'Lag 1',
+                        a: m.team2?.teamName || 'Lag 2',
+                        c: 'Viaplay'
+                    }));
+                } else {
+                    generateFallbackSchedule();
+                }
+            } catch (e) {
+                generateFallbackSchedule();
+            }
+            render();
+        }
+
+        function generateFallbackSchedule() {
+            FX = [
+                { lg: 'pl', round: 8, d: '2026-10-10', t: '13:30', h: 'Arsenal', a: 'Chelsea', c: 'Prime Video' },
+                { lg: 'pl', round: 8, d: '2026-10-10', t: '16:00', h: 'Liverpool', a: 'Man City', c: 'Viaplay' },
+                { lg: 'll', round: 9, d: '2026-10-11', t: '21:00', h: 'Real Madrid', a: 'Barcelona', c: 'TV4 Play' },
+                { lg: 'al', round: 26, d: '2026-10-12', t: '19:00', h: 'Malmö FF', a: 'AIK', c: 'C More' },
+                { lg: 'nh', round: 2, d: '2026-10-10', t: '01:00', h: 'Rangers', a: 'Bruins', c: 'Viaplay' }
+            ];
         }
 
         function render() {
@@ -302,12 +380,12 @@
             }
 
             if (activeTeam) {
-                const teamMatches = FX.filter(f => f.h === activeTeam || f.a === activeTeam);
+                const teamMatches = FX.filter(f => f.h.toLowerCase().includes(activeTeam.toLowerCase()) || f.a.toLowerCase().includes(activeTeam.toLowerCase()));
                 container.innerHTML = `
                     <button id="back-to-leagues" class="lk" style="margin-bottom:12px;">← Tillbaka till ligor</button>
                     <h2>⚽ ${activeTeam}</h2>
-                    <h3>Hela säsongens matcher</h3>
-                    ${teamMatches.length === 0 ? '<div class="card"><div style="color:var(--text-muted);">Inga matcher.</div></div>' : teamMatches.map(m => matchCardHTML(m)).join('')}
+                    <h3>Matcher</h3>
+                    ${teamMatches.length === 0 ? '<div class="card"><div style="color:var(--text-muted);">Inga matcher hittades i det aktuella schemat.</div></div>' : teamMatches.map(m => matchCardHTML(m)).join('')}
                 `;
                 return;
             }
@@ -322,22 +400,13 @@
                     </div>
                 ` : '';
 
-                let roundsHtml = '';
-                for (let r = 6; r <= 38; r++) {
-                    const roundMatches = leagueMatches.filter(m => m.round === r);
-                    if (roundMatches.length) {
-                        roundsHtml += `<div class="round-header">Omgång ${r}</div>`;
-                        roundsHtml += roundMatches.map(m => matchCardHTML(m)).join('');
-                    }
-                }
-
                 container.innerHTML = `
                     <button id="back-to-sports" class="lk" style="margin-bottom:12px;">← Tillbaka till sporter</button>
                     <h2>${league.icon} ${league.name}</h2>
                     <small style="color:var(--text-muted); display:block; margin-bottom:16px;">📺 ${league.tv}</small>
                     ${teamsHtml}
                     <h3>Spelschema</h3>
-                    ${roundsHtml}
+                    ${leagueMatches.length ? leagueMatches.map(m => matchCardHTML(m)).join('') : '<div class="card"><div style="color:var(--text-muted);">Hämtar spelschema...</div></div>'}
                 `;
                 return;
             }
@@ -378,9 +447,9 @@
                 days.forEach(day => {
                     const dayItems = cal.filter(item => item.d === day.dStr);
                     let itemsHtml = dayItems.length === 0 
-                        ? `<div class="empty-day">Inga aktiviteter (Dra hit aktivitet)</div>` 
+                        ? `<div class="empty-day">Inga aktiviteter</div>` 
                         : dayItems.map(i => `
-                            <div class="item" draggable="true" data-id="${i.id}">
+                            <div class="item" data-id="${i.id}">
                                 <div class="item-content">
                                     <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">${i.t}</div>
                                     <div style="display: flex; gap: 8px; align-items: center;">
@@ -393,7 +462,11 @@
                                     <div class="dropdown-menu" id="menu-${i.id}">
                                         <button class="dropdown-item move-tomorrow" data-id="${i.id}">Imorgon</button>
                                         <button class="dropdown-item move-next-week" data-id="${i.id}">Nästa vecka</button>
-                                        <button class="dropdown-item trigger-date-picker" data-id="${i.id}">Annan dag</button>
+                                        <button class="dropdown-item trigger-move-menu" data-id="${i.id}">Flytta till dag...</button>
+                                        <div class="sub-days-menu" id="sub-days-${i.id}">
+                                            ${days.map(d => `<button class="sub-day-btn move-to-specific-date" data-id="${i.id}" data-date="${d.dStr}">${d.name} (${d.date})</button>`).join('')}
+                                        </div>
+                                        <button class="dropdown-item trigger-date-picker" data-id="${i.id}">Annan dag...</button>
                                         <input type="date" class="dropdown-date-input" id="date-input-${i.id}" data-id="${i.id}" value="${i.d}">
                                         <button class="dropdown-item remove-item" data-id="${i.id}">Ta bort</button>
                                     </div>
@@ -412,7 +485,7 @@
                                 <span class="day-date">${day.date}</span>
                             </div>
                         </div>
-                        <div class="drop-zone" data-date="${day.dStr}">${itemsHtml}</div>
+                        <div>${itemsHtml}</div>
                     `;
                     container.appendChild(card);
                 });
@@ -493,56 +566,11 @@
             resultsBox.innerHTML = html || `<div style="color: var(--text-muted); text-align: center; padding-top: 40px;">Inga träffar hittades.</div>`;
         });
 
-        // Drag & Drop
-        let draggedItemId = null;
-
-        document.addEventListener('dragstart', e => {
-            if (e.target.classList.contains('item')) {
-                draggedItemId = Number(e.target.dataset.id);
-                e.target.classList.add('dragging');
-            }
-        });
-
-        document.addEventListener('dragend', e => {
-            if (e.target.classList.contains('item')) {
-                e.target.classList.remove('dragging');
-                draggedItemId = null;
-            }
-        });
-
-        document.addEventListener('dragover', e => {
-            e.preventDefault();
-            const zone = e.target.closest('.day-card');
-            if (zone) zone.classList.add('drag-over');
-        });
-
-        document.addEventListener('dragleave', e => {
-            const zone = e.target.closest('.day-card');
-            if (zone) zone.classList.remove('drag-over');
-        });
-
-        document.addEventListener('drop', e => {
-            e.preventDefault();
-            const zone = e.target.closest('.day-card');
-            if (zone) {
-                zone.classList.remove('drag-over');
-                const targetDate = zone.dataset.date;
-                if (draggedItemId !== null && targetDate) {
-                    const item = cal.find(i => i.id === draggedItemId);
-                    if (item) {
-                        item.d = targetDate;
-                        render();
-                    }
-                }
-            }
-        });
-
         // Klickhanterare & menyer
         document.addEventListener('click', async e => {
             const target = e.target;
             const modal = document.getElementById('search-modal');
 
-            // Stäng menyer om man klickar utanför
             if (!target.closest('.menu-container') && !target.classList.contains('dropdown-date-input')) {
                 document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
             }
@@ -581,6 +609,21 @@
                     render();
                 }
             }
+            else if (target.classList.contains('trigger-move-menu')) {
+                e.stopPropagation();
+                const id = target.dataset.id;
+                const subMenu = document.getElementById(`sub-days-${id}`);
+                subMenu.classList.toggle('show');
+            }
+            else if (target.classList.contains('move-to-specific-date')) {
+                const id = Number(target.dataset.id);
+                const newDate = target.dataset.date;
+                const item = cal.find(i => i.id === id);
+                if (item && newDate) {
+                    item.d = newDate;
+                    render();
+                }
+            }
             else if (target.classList.contains('trigger-date-picker')) {
                 e.stopPropagation();
                 const id = target.dataset.id;
@@ -600,6 +643,23 @@
                 activeTeam = null;
                 selectedShow = null;
                 selectedMovie = null;
+                render();
+            }
+            else if (target.closest('.league-card')) {
+                activeLeague = target.closest('.league-card').dataset.league;
+                activeTeam = null;
+                render();
+            }
+            else if (target.classList.contains('team-sel')) {
+                activeTeam = target.dataset.team;
+                render();
+            }
+            else if (target.id === 'back-to-leagues') {
+                activeTeam = null;
+                render();
+            }
+            else if (target.id === 'back-to-sports') {
+                activeLeague = null;
                 render();
             }
             else if (target.id === 'prev-week-btn') {
@@ -626,82 +686,4 @@
                 render();
             }
             else if (target.closest('.search-click-team')) {
-                activeTeam = target.closest('.search-click-team').dataset.team;
-                selectedShow = null;
-                selectedMovie = null;
-                modal.style.display = 'none';
-                render();
-            }
-            else if (target.closest('.search-click-show')) {
-                const showId = target.closest('.search-click-show').dataset.id;
-                try {
-                    const showRes = await fetch(`https://api.tvmaze.com/shows/${showId}`);
-                    selectedShow = await showRes.json();
-                    const epRes = await fetch(`https://api.tvmaze.com/shows/${showId}/episodes`);
-                    showEpisodes = await epRes.json();
-                    activeLeague = null;
-                    activeTeam = null;
-                    selectedMovie = null;
-                    modal.style.display = 'none';
-                    render();
-                } catch (err) {
-                    alert('Kunde inte hämta seriedata');
-                }
-            }
-            else if (target.closest('.search-click-movie')) {
-                const mTitle = target.closest('.search-click-movie').dataset.title;
-                selectedMovie = { title: mTitle, release_date: '2024', overview: 'Filmvisning.' };
-                activeLeague = null;
-                activeTeam = null;
-                selectedShow = null;
-                modal.style.display = 'none';
-                render();
-            }
-            else if (target.id === 'back-to-main' || target.id === 'back-to-leagues' || target.id === 'back-to-sports') {
-                activeLeague = null;
-                activeTeam = null;
-                selectedShow = null;
-                selectedMovie = null;
-                render();
-            }
-            else if (target.id === 'add-movie-cal-btn') {
-                const dateVal = document.getElementById('movie-date-input').value;
-                const title = `🎬 ${selectedMovie.title}`;
-                const sub = 'Film · Streaming';
-                if (!cal.some(item => item.t === title && item.d === dateVal)) {
-                    cal.push({ id: Date.now(), ic: '🎬', t: title, s: sub, d: dateVal });
-                }
-                alert(`Filmen tillagd i kalendern (${dateVal})!`);
-                currentTab = 'vecka';
-                render();
-            }
-            else if (target.classList.contains('add-cal-btn')) {
-                const t = target.dataset.title;
-                const s = target.dataset.sub;
-                const d = target.dataset.date;
-                if (!cal.some(item => item.t === t && item.d === d)) {
-                    cal.push({ id: Date.now(), ic: '📺', t, s, d });
-                }
-                alert(`Tillagd i kalendern (${d})!`);
-            }
-        });
-
-        // Ändra datum när användaren väljer i datumväljaren
-        document.addEventListener('change', e => {
-            if (e.target.classList.contains('dropdown-date-input')) {
-                const id = Number(e.target.dataset.id);
-                const newDate = e.target.value;
-                const item = cal.find(i => i.id === id);
-                if (item && newDate) {
-                    item.d = newDate;
-                    render();
-                }
-            }
-        });
-
-        window.onload = function() {
-            render();
-        };
-    </script>
-</body>
-</html>
+                activeTeam =
