@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextWeek</title>
+    <style>
+        :root {
+            --bg-color: #0b0b0f;
+            --card-bg: #16161f;
+            --card-hover: #1e1e2d;
+            --accent: #ff3b30;
+            --accent-hover: #e03229;
+            --text-main: #ffffff;
+            --text-muted: #8e8e93;
+            --border: #2c2c3e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 100px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background-color: var(--bg-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .header-left:hover .header-title-wrapper h1 {
+            color: var(--accent);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            background-color: var(--accent);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .header-left:hover .logo-icon {
+            transform: scale(1.05);
+        }
+
+        .header-title-wrapper h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            transition: color 0.2s;
+        }
+
+        .header-title-wrapper p {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .action-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .action-btn.primary {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        /* Veckonavigeringsbar */
+        .week-nav-bar {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .week-nav-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .week-nav-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--card-hover);
+        }
+
+        .week-nav-info {
+            text-align: center;
+        }
+
+        .week-nav-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .week-nav-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .day-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .day-card.is-today {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 59, 48, 0.15);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .day-title {
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: capitalize;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .today-badge {
+            background: rgba(255, 59, 48, 0.2);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .day-date {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .add-item-btn {
+            background: none;
+            border: 1px dashed var(--border);
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .add-item-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 40px;
+        }
+
+        .item {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            cursor: grab;
+            position: relative;
+        }
+
+        .item:active {
+            cursor: grabbing;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .badge {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .item-actions {
+            position: relative;
+        }
+
+        .dots-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .dots-btn:hover {
+            color: var(--text-main);
+        }
+
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 30px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 50;
+            width: 150px;
+            overflow: hidden;
+        }
+
+        .menu-dropdown.show {
+            display: block;
+        }
+
+        .menu-item {
+            padding: 10px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            text-align: left;
+            background: none;
+            width: 100%;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+            color: var(--accent);
+        }
+
+        .menu-item:hover {
+            background: var(--card-hover);
+        }
+
+        .empty-day {
+            color: var(--text-muted);
+            font-size: 13px;
+            text-align: center;
+            padding: 10px 0;
+            font-style: italic;
+        }
+
+        /* Detaljsida & Sportvy */
+        #detail-view, #sport-view, #favorites-view {
+            display: none;
+        }
+
+        .detail-header-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .back-nav-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            align-self: flex-start;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .back-nav-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .detail-title {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .detail-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .season-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin-bottom: 16px;
+        }
+
+        .season-tab {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .season-tab.active {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .season-tab:hover:not(.active) {
+            border-color: var(--text-muted);
+            color: var(--text-main);
+        }
+
+        .detail-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .detail-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-item-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .detail-item-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .detail-item-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .add-plus-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .add-plus-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Större och luftigare Sport-meny grid */
+        .sport-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .sport-league-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sport-league-card:hover {
+            border-color: var(--accent);
+            background-color: var(--card-hover);
+            transform: translateY(-3px);
+        }
+
+        .sport-league-card .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sport-league-card .name {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .sport-league-card .flags-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 18px;
+        }
+
+        .sport-league-card .flag-icon {
+            width: 26px;
+            height: 18px;
+            border-radius: 3px;
+            object-fit: cover;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        /* Bottenmeny */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active, .nav-item:hover {
+            color: var(--accent);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 60px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 15px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+        }
+
+        .suggestions-list {
+            max-height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .suggestion-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s;
+        }
+
+        .suggestion-item:hover {
+            border-color: var(--accent);
+            background: var(--card-hover);
+        }
+    
+        /* NextWeek V2 overrides */
+        header{
+            max-width:650px;
+            margin:0 auto;
+            width:100%;
+            border-bottom:1px solid var(--border);
+        }
+        .header-left{gap:10px}
+        .header-title-wrapper h1{font-size:20px}
+        .header-search-btn{
+            width:42px;
+            height:42px;
+            border-radius:12px;
+            border:1px solid var(--border);
+            background:var(--card-bg);
+            color:var(--text-main);
+            display:grid;
+            place-items:center;
+            cursor:pointer;
+        }
+        .header-search-btn svg{width:20px;height:20px}
+        .week-nav-info{flex:1}
+        .week-nav-subtitle{display:none!important}
+
+        .item{
+            cursor:grab;
+            touch-action:pan-y;
+            user-select:none;
+            -webkit-user-select:none;
+        }
+        .item.drag-source{opacity:.25}
+        .day-card.drag-target{
+            outline:2px solid var(--accent);
+            outline-offset:2px;
+        }
+        .drag-ghost{
+            position:fixed;
+            z-index:3000;
+            pointer-events:none;
+            width:min(560px, calc(100vw - 40px));
+            opacity:.94;
+            transform:rotate(1.5deg) scale(1.015);
+            box-shadow:0 18px 50px rgba(0,0,0,.55);
+        }
+        body.nw-dragging{user-select:none;-webkit-user-select:none}
+
+        .menu-dropdown{
+            border:none;
+            border-radius:10px;
+            background:rgba(17,17,24,.96);
+            box-shadow:0 12px 35px rgba(0,0,0,.55);
+            padding:6px 0;
+            width:170px;
+            overflow:visible;
+        }
+        .menu-item{
+            border:0!important;
+            background:transparent!important;
+            padding:9px 14px;
+            color:var(--text-main);
+        }
+        .menu-item:last-child{color:#ff6b64}
+        .menu-item:hover{color:var(--accent)}
+
+        .section-heading-row{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:16px;
+        }
+        .page-heading{font-size:24px;font-weight:800}
+        .page-subheading{margin-top:3px;font-size:13px;color:var(--text-muted)}
+
+        .media-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:14px;
+        }
+        .media-card{
+            position:relative;
+            background:var(--card-bg);
+            border:1px solid var(--border);
+            border-radius:16px;
+            overflow:hidden;
+            cursor:pointer;
+            min-width:0;
+        }
+        .media-poster{
+            width:100%;
+            aspect-ratio:2/3;
+            object-fit:cover;
+            background:#111;
+            display:block;
+        }
+        .media-poster-placeholder{
+            aspect-ratio:2/3;
+            display:grid;
+            place-items:center;
+            font-size:42px;
+            background:linear-gradient(145deg,#151522,#0d0d12);
+        }
+        .media-card-body{padding:10px}
+        .media-title{
+            font-size:13px;
+            font-weight:750;
+            line-height:1.25;
+            display:-webkit-box;
+            -webkit-line-clamp:2;
+            -webkit-box-orient:vertical;
+            overflow:hidden;
+        }
+        .media-meta{font-size:11px;color:var(--text-muted);margin-top:4px}
+        .heart-btn{
+            position:absolute;
+            top:8px;
+            right:8px;
+            z-index:2;
+            width:34px;
+            height:34px;
+            display:grid;
+            place-items:center;
+            border:0;
+            border-radius:50%;
+            background:rgba(8,8,12,.82);
+            color:#fff;
+            font-size:18px;
+            cursor:pointer;
+        }
+        .heart-btn.on{color:#ff4d62}
+
+        .sport-grid{
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:12px;
+        }
+        .sport-league-card{
+            position:relative;
+            padding:18px 12px;
+            min-height:155px;
+        }
+        .league-logo-wrap{
+            height:58px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            margin-bottom:10px;
+        }
+        .league-logo{
+            max-width:76px;
+            max-height:58px;
+            object-fit:contain;
+        }
+        .league-logo-fallback{font-size:38px}
+        .league-sport{
+            color:var(--text-muted);
+            font-size:12px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:5px;
+        }
+
+        .schedule-card{
+            background:var(--card-bg);
+            border:1px solid var(--border);
+            border-radius:14px;
+            padding:14px;
+            display:grid;
+            gap:10px;
+        }
+        .schedule-top{
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            align-items:flex-start;
+        }
+        .schedule-title{
+            font-size:14px;
+            font-weight:750;
+            line-height:1.3;
+        }
+        .team-link{
+            cursor:pointer;
+            color:var(--text-main);
+        }
+        .team-link:hover{color:var(--accent)}
+        .schedule-time{
+            flex:0 0 auto;
+            color:var(--accent);
+            font-size:12px;
+            font-weight:800;
+        }
+        .schedule-meta{
+            color:var(--text-muted);
+            font-size:12px;
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            align-items:center;
+        }
+        .schedule-actions{
+            display:flex;
+            gap:8px;
+            justify-content:flex-end;
+            align-items:center;
+        }
+        .add-plus-btn{
+            background:#252534;
+            color:#fff;
+            border:1px solid #343447;
+        }
+        .add-plus-btn.added{
+            background:#218a4a;
+            border-color:#2eaf62;
+            color:#fff;
+        }
+        .inline-heart{
+            width:36px;
+            height:36px;
+            border-radius:10px;
+            border:1px solid #343447;
+            background:#20202d;
+            color:#fff;
+            cursor:pointer;
+            font-size:17px;
+        }
+        .inline-heart.on{color:#ff4d62}
+
+        .detail-title-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+        }
+        .detail-logo{
+            width:58px;
+            height:58px;
+            object-fit:contain;
+            border-radius:12px;
+            background:#fff;
+            padding:4px;
+        }
+        .provider-chip{
+            display:inline-flex;
+            padding:3px 7px;
+            border-radius:6px;
+            background:#252536;
+            color:#c8c8cf;
+            font-size:10px;
+            margin-right:4px;
+        }
+        .loading-card,.error-card{
+            padding:28px 16px;
+            text-align:center;
+            color:var(--text-muted);
+            border:1px dashed var(--border);
+            border-radius:14px;
+        }
+        .error-card{color:#ff7168}
+
+        .favorite-grid{
+            display:grid;
+            gap:10px;
+        }
+        .favorite-card{
+            display:grid;
+            grid-template-columns:46px minmax(0,1fr) auto;
+            gap:10px;
+            align-items:center;
+            padding:12px;
+            border-radius:14px;
+            background:var(--card-bg);
+            border:1px solid var(--border);
+            cursor:pointer;
+        }
+        .favorite-icon{
+            width:46px;height:46px;
+            border-radius:10px;
+            object-fit:contain;
+            background:#11131a;
+            display:grid;
+            place-items:center;
+            font-size:24px;
+        }
+        .favorite-name{font-weight:750;font-size:14px}
+        .favorite-sub{font-size:11px;color:var(--text-muted);margin-top:3px}
+        .favorite-remove{
+            border:0;background:transparent;color:#ff6b64;
+            font-size:20px;padding:8px;cursor:pointer;
+        }
+
+        @media(max-width:430px){
+            header{padding:12px 14px}
+            .container{padding:16px 12px}
+            .day-card{padding:13px}
+            .week-nav-bar{margin-bottom:14px}
+            .bottom-nav{padding-bottom:max(9px, env(safe-area-inset-bottom))}
+            .nav-item{font-size:10px}
+            .nav-icon{font-size:19px}
+            .modal-overlay{padding-top:35px}
+            .modal-content{width:94%;padding:16px}
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left" onclick="goToHome()" title="Tillbaka till förstasidan">
+            <div class="logo-icon">📅</div>
+            <div class="header-title-wrapper">
+                <h1>NextWeek</h1>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-search-btn" onclick="openSearchModal()" aria-label="Sök" title="Sök">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-3.2-3.2"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- HUVUDVY: Kalender -->
+    <div class="container" id="calendar-view">
+        <div class="week-nav-bar">
+            <button class="week-nav-btn" onclick="changeWeek(-1)">❮</button>
+            <div class="week-nav-info">
+                <div class="week-nav-title" id="week-title-label">Vecka</div>
+            </div>
+            <button class="week-nav-btn" onclick="changeWeek(1)">❯</button>
+        </div>
+
+        <div id="calendar-container">
+            <!-- Kalenderdagar genereras här -->
+        </div>
+    </div>
+
+    <!-- DETALJVY: Sida för serie eller film -->
+    <div class="container" id="detail-view">
+        <div class="detail-header-card">
+            <button class="back-nav-btn" onclick="showCalendarView()">❮ Tillbaka till vecka</button>
+            <div>
+                <h2 class="detail-title" id="detail-page-title">Titel</h2>
+                <p class="detail-subtitle" id="detail-page-subtitle">Undertext</p>
+            </div>
+        </div>
+
+        <div id="season-tabs-container" class="season-tabs" style="display: none;"></div>
+
+        <div class="detail-section-title" id="detail-section-heading">Avsnitt</div>
+        <div class="detail-list" id="detail-items-container"></div>
+    </div>
+
+    <!-- FILMVY -->
+    <div class="container" id="movie-view" style="display:none;">
+        <div class="section-heading-row">
+            <div>
+                <h2 class="page-heading">Film</h2>
+                <p class="page-subheading">Trendar just nu</p>
+            </div>
+        </div>
+        <div id="movie-content-container" class="media-grid"></div>
+    </div>
+
+    <!-- SERIEVY -->
+    <div class="container" id="series-view" style="display:none;">
+        <div class="section-heading-row">
+            <div>
+                <h2 class="page-heading">Serier</h2>
+                <p class="page-subheading">Trendar just nu</p>
+            </div>
+        </div>
+        <div id="series-content-container" class="media-grid"></div>
+    </div>
+
+    <!-- SPORTVY: Ligor & Lag -->
+    <div class="container" id="sport-view">
+        <div class="detail-header-card">
+            <button class="back-nav-btn" id="sport-back-btn" onclick="renderSportLeagues()">❮ Tillbaka till ligor</button>
+            <div>
+                <h2 class="detail-title" id="sport-page-title">Sport & Ligor</h2>
+                <p class="detail-subtitle" id="sport-page-subtitle">Välj en liga nedan för att se spelschema och matcher</p>
+            </div>
+        </div>
+        <div id="sport-content-container">
+            <!-- Ligor eller matcher fylls i här -->
+        </div>
+    </div>
+
+    <!-- FAVORITER VY -->
+    <div class="container" id="favorites-view">
+        <div class="detail-header-card">
+            <h2>Favoriter</h2>
+            <p class="detail-subtitle">Dina sparade favoritlag och serier</p>
+        </div>
+        <div id="favorites-content-container"></div>
+    </div>
+
+    <!-- Fast bottenmeny -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" id="nav-vecka-btn" onclick="switchTab('vecka')">
+            <span class="nav-icon">📅</span>
+            <span>Vecka</span>
+        </button>
+        <button class="nav-item" id="nav-film-btn" onclick="switchTab('film')">
+            <span class="nav-icon">🎬</span>
+            <span>Film</span>
+        </button>
+        <button class="nav-item" id="nav-serie-btn" onclick="switchTab('serie')">
+            <span class="nav-icon">📺</span>
+            <span>Serie</span>
+        </button>
+        <button class="nav-item" id="nav-sport-btn" onclick="switchTab('sport')">
+            <span class="nav-icon">⚽</span>
+            <span>Sport</span>
+        </button>
+        <button class="nav-item" id="nav-favoriter-btn" onclick="switchTab('favoriter')">
+            <span class="nav-icon">❤️</span>
+            <span>Favoriter</span>
+        </button>
+    </nav>
+
+    <!-- Sök & Lägg till Modal -->
+    <div class="modal-overlay" id="search-modal" onclick="nwOverlayClose(event, 'search-modal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Sök filmer, serier och sport</h2>
+                <button class="close-modal" onclick="closeSearchModal()">✕</button>
+            </div>
+            <input type="text" id="global-search-input" class="search-input" placeholder="Sök t.ex. Arsenal, Ted Lasso, F1..." oninput="handleUnifiedSearch(this.value)">
+            <div class="suggestions-list" id="suggestions-container">
+                <div style="color: var(--text-muted); text-align: center; padding: 20px;">Börja skriva för att söka bland serier, filmer och sport...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datumväljare Modal -->
+    <div class="modal-overlay" id="date-modal" onclick="nwOverlayClose(event, 'date-modal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Välj ett nytt datum</h2>
+                <button class="close-modal" onclick="closeDateModal()">✕</button>
+            </div>
+            <input type="date" id="target-date-input" class="search-input" onchange="confirmMoveToDate(this.value)">
+        </div>
+    </div>
+
+    <script>
+        const TMDB_API_KEY = "3b003666d812328fb6097e937d1e8ef9";
+        const todayDateStr = new Date().toISOString().split('T')[0];
+        let currentStartDate = new Date();
+        let activeItemId = null;
+        let currentMediaCache = null;
+        let searchTimeout = null;
+
+        let calendarData = JSON.parse(localStorage.getItem('nextweek_live_data')) || {};
+
+        function saveData() {
+            localStorage.setItem('nextweek_live_data', JSON.stringify(calendarData));
+        }
+
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        }
+
+        function updateWeekHeader() {
+            const start = new Date(currentStartDate);
+            const end = new Date(currentStartDate);
+            end.setDate(start.getDate() + 6);
+            const weekNum = getWeekNumber(start);
+            document.getElementById('week-title-label').innerText = `Vecka ${weekNum} (${start.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })} - ${end.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })})`;
+        }
+
+        function changeWeek(direction) {
+            currentStartDate.setDate(currentStartDate.getDate() + (direction * 7));
+            updateWeekHeader();
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const container = document.getElementById('calendar-container');
+            container.innerHTML = '';
+
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(currentStartDate);
+                d.setDate(currentStartDate.getDate() + i);
+                const dateStr = d.toISOString().split('T')[0];
+                const isToday = (dateStr === todayDateStr);
+                const dayName = d.toLocaleDateString('sv-SE', { weekday: 'long' });
+                const formattedDate = d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+
+                const dayCard = document.createElement('div');
+                dayCard.className = `day-card ${isToday ? 'is-today' : ''}`;
+
+                let itemsHtml = '';
+                const items = calendarData[dateStr] || [];
+
+                if (items.length === 0) {
+                    itemsHtml = `<div class="empty-day">Inga aktiviteter</div>`;
+                } else {
+                    items.forEach(item => {
+                        itemsHtml += `
+                            <div class="item" draggable="true" ondragstart="handleDragStart(event, '${dateStr}', '${item.id}')">
+                                <div class="item-info">
+                                    <div class="item-title">${item.title}</div>
+                                    <div class="item-meta">
+                                        <span class="badge">${item.type}</span>
+                                        <span>${item.channel || 'TMDB'}</span>
+                                    </div>
+                                </div>
+                                <div class="item-actions">
+                                    <button class="dots-btn" onclick="toggleMenu(event, '${item.id}')">•••</button>
+                                    <div class="menu-dropdown" id="menu-${item.id}">
+                                        <button class="menu-item" onclick="moveItem('${dateStr}', '${item.id}', 'tomorrow')">Imorgon</button>
+                                        <button class="menu-item" onclick="moveItem('${dateStr}', '${item.id}', 'nextweek')">Nästa vecka</button>
+                                        <button class="menu-item" onclick="openDateModalFor('${dateStr}', '${item.id}')">Annan dag...</button>
+                                        <button class="menu-item" onclick="deleteItem('${dateStr}', '${item.id}')">Ta bort</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                dayCard.innerHTML = `
+                    <div class="day-header">
+                        <div>
+                            <span class="day-title">${dayName} ${isToday ? '<span class="today-badge">Idag</span>' : ''}</span>
+                            <span class="day-date">${formattedDate}</span>
+                        </div>
+                        <button class="add-item-btn" onclick="openSearchModal()" title="Lägg till">+</button>
+                    </div>
+                    <div class="item-list" ondragover="allowDrop(event)" ondrop="handleDrop(event, '${dateStr}')">
+                        ${itemsHtml}
+                    </div>
+                `;
+                container.appendChild(dayCard);
+            }
+        }
+
+        function hideAllViews() {
+            document.getElementById('calendar-view').style.display = 'none';
+            document.getElementById('detail-view').style.display = 'none';
+            document.getElementById('sport-view').style.display = 'none';
+            document.getElementById('favorites-view').style.display = 'none';
+        }
+
+        function goToHome() {
+            hideAllViews();
+            document.getElementById('calendar-view').style.display = 'block';
+            scrollToToday();
+        }
+
+        function showCalendarView() {
+            hideAllViews();
+            document.getElementById('calendar-view').style.display = 'block';
+        }
+
+        function scrollToToday() {
+            showCalendarView();
+            currentStartDate = new Date();
+            currentStartDate.setDate(currentStartDate.getDate() - (currentStartDate.getDay() + 6) % 7);
+            updateWeekHeader();
+            renderCalendar();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('active'));
+            if(tabName === 'vecka') {
+                document.getElementById('nav-vecka-btn').classList.add('active');
+                scrollToToday();
+            } else if(tabName === 'film') {
+                document.getElementById('nav-film-btn').classList.add('active');
+                openSearchModal();
+            } else if(tabName === 'sport') {
+                document.getElementById('nav-sport-btn').classList.add('active');
+                hideAllViews();
+                document.getElementById('sport-view').style.display = 'block';
+                renderSportLeagues();
+            } else if(tabName === 'favoriter') {
+                document.getElementById('nav-favoriter-btn').classList.add('active');
+                hideAllViews();
+                document.getElementById('favorites-view').style.display = 'block';
+            }
+        }
+
+        /* Sportsektion med de ursprungliga ikonerna och större kort */
+        const sportLeagues = [
+            { id: 'pl', name: 'Premier League', icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', flags: ['https://flagcdn.com/w40/gb-eng.png'] },
+            { id: 'championship', name: 'Championship', icon: '🦁', flags: ['https://flagcdn.com/w40/gb-eng.png'] },
+            { id: 'allsvenskan', name: 'Allsvenskan', icon: '🇸🇪', flags: ['https://flagcdn.com/w40/se.png'] },
+            { id: 'bundesliga', name: 'Bundesliga', icon: '🇩🇪', flags: ['https://flagcdn.com/w40/de.png'] },
+            { id: 'seria', name: 'Serie A', icon: '🇮🇹', flags: ['https://flagcdn.com/w40/it.png'] },
+            { id: 'laliga', name: 'La Liga', icon: '🇪🇸', flags: ['https://flagcdn.com/w40/es.png'] },
+            { id: 'nba', name: 'NBA', icon: '🏀', flags: ['https://flagcdn.com/w40/us.png', 'https://flagcdn.com/w40/ca.png'] },
+            { id: 'nfl', name: 'NFL', icon: '🏈', flags: ['https://flagcdn.com/w40/us.png'] },
+            { id: 'nhl', name: 'NHL', icon: '🏒', flags: ['https://flagcdn.com/w40/us.png', 'https://flagcdn.com/w40/ca.png'] },
+            { id: 'f1', name: 'Formel 1', icon: '🏎️', flags: [] }
+        ];
+
+        const mockSportTeamsAndMatches = [
+            { title: 'Arsenal - Chelsea', league: 'Premier League', type: 'Sport', channel: 'Viaplay', time: '12 okt 16:00' },
+            { title: 'Liverpool - Manchester United', league: 'Premier League', type: 'Sport', channel: 'Viaplay', time: '13 okt 18:30' },
+            { title: 'Manchester City - Tottenham', league: 'Premier League', type: 'Sport', channel: 'Viaplay', time: '14 okt 21:00' },
+            { title: 'AIK - Djurgården', league: 'Allsvenskan', type: 'Sport', channel: 'Max', time: '11 okt 15:00' },
+            { title: 'Malmö FF - Hammarby', league: 'Allsvenskan', type: 'Sport', channel: 'Max', time: '12 okt 17:30' },
+            { title: 'Real Madrid - Barcelona', league: 'La Liga', type: 'Sport', channel: 'TV4 Play', time: '18 okt 21:00' },
+            { title: 'Boston Bruins - Toronto Maple Leafs', league: 'NHL', type: 'Sport', channel: 'Viaplay', time: '15 okt 01:00' }
+        ];
+
+        function renderSportLeagues() {
+            document.getElementById('sport-back-btn').style.display = 'none';
+            document.getElementById('sport-page-title').innerText = 'Sport & Ligor';
+            document.getElementById('sport-page-subtitle').innerText = 'Välj en liga nedan för att se kommande spelschema';
+
+            let html = '<div class="sport-grid">';
+            sportLeagues.forEach(l => {
+                let flagsHtml = '';
+                l.flags.forEach(flagUrl => {
+                    flagsHtml += `<img class="flag-icon" src="${flagUrl}" alt="Flagga">`;
+                });
+
+                html += `
+                    <div class="sport-league-card" onclick="renderLeagueSchedule('${l.id}', '${l.name}')">
+                        <div class="icon">${l.icon}</div>
+                        <div class="name">${l.name}</div>
+                        <div class="flags-container">
+                            ${flagsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            document.getElementById('sport-content-container').innerHTML = html;
+        }
+
+        function renderLeagueSchedule(leagueId, leagueName) {
+            document.getElementById('sport-back-btn').style.display = 'flex';
+            document.getElementById('sport-page-title').innerText = leagueName;
+            document.getElementById('sport-page-subtitle').innerText = 'Kommande matcher & spelschema';
+
+            const matches = mockSportTeamsAndMatches.filter(m => m.league === leagueName || leagueName === 'Alla');
+
+            let html = '<div class="detail-list">';
+            matches.forEach(m => {
+                html += `
+                    <div class="detail-item-card">
+                        <div class="detail-item-info">
+                            <h4>${m.title}</h4>
+                            <p>📅 ${m.time} • 📺 ${m.channel}</p>
+                        </div>
+                        <button class="add-plus-btn" onclick="addItemToCalendar('${m.title}', '${m.channel}', 'Sport', '${todayDateStr}')" title="Lägg till">+</button>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            document.getElementById('sport-content-container').innerHTML = html;
+        }
+
+        /* Unified Search (Filmer, Serier & Sport) */
+        async function fetchTMDB(endpoint) {
+            const targetUrl = `https://api.themoviedb.org/3${endpoint}`;
+            try {
+                const res = await fetch(`https://api.allorigins.win/raw?url=` + encodeURIComponent(targetUrl));
+                if (res.ok) return await res.json();
+            } catch (e) {}
+            const res2 = await fetch(`https://corsproxy.io/?` + encodeURIComponent(targetUrl));
+            return await res2.json();
+        }
+
+        function openSearchModal() {
+            document.getElementById('search-modal').classList.add('show');
+            document.getElementById('global-search-input').focus();
+        }
+
+        function closeSearchModal() {
+            document.getElementById('search-modal').classList.remove('show');
+            document.getElementById('global-search-input').value = '';
+            document.getElementById('suggestions-container').innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">Börja skriva för att söka bland serier, filmer och sport...</div>';
+        }
+
+        function handleUnifiedSearch(query) {
+            clearTimeout(searchTimeout);
+            const container = document.getElementById('suggestions-container');
+            if (!query.trim()) {
+                container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">Börja skriva för att söka bland serier, filmer och sport...</div>';
+                return;
+            }
+            container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">Söker...</div>';
+
+            searchTimeout = setTimeout(async () => {
+                let html = '';
+
+                const matchedSports = mockSportTeamsAndMatches.filter(m => m.title.toLowerCase().includes(query.toLowerCase()) || m.league.toLowerCase().includes(query.toLowerCase()));
+                matchedSports.forEach(s => {
+                    html += `
+                        <div class="suggestion-item" onclick="addItemToCalendar('${s.title}', '${s.channel}', 'Sport', '${todayDateStr}'); closeSearchModal();">
+                            <div>
+                                <div style="font-weight: 600; font-size: 14px;">⚽ ${s.title}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">${s.league} • 📺 ${s.channel} (${s.time})</div>
+                            </div>
+                            <span style="color: var(--accent); font-weight: bold; font-size: 12px;">+ Lägg till</span>
+                        </div>
+                    `;
+                });
+
+                try {
+                    const data = await fetchTMDB(`/search/multi?api_key=${TMDB_API_KEY}&language=sv-SE&query=${encodeURIComponent(query)}&page=1&include_adult=false`);
+                    const results = (data.results || []).filter(item => item.media_type === 'tv' || item.media_type === 'movie');
+
+                    results.forEach(item => {
+                        const title = item.title || item.name;
+                        const year = (item.release_date || item.first_air_date || '').substring(0, 4);
+                        const type = item.media_type === 'tv' ? 'Serie' : 'Film';
+                        const icon = item.media_type === 'tv' ? '📺' : '🎬';
+
+                        html += `
+                            <div class="suggestion-item" onclick="fetchMediaDetails('${item.id}', '${item.media_type}')">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 14px;">${icon} ${title}</div>
+                                    <div style="font-size: 12px; color: var(--text-muted);">${type} ${year ? '• ' + year : ''}</div>
+                                </div>
+                                <span style="color: var(--accent); font-weight: bold; font-size: 14px;">Visa ➔</span>
+                            </div>
+                        `;
+                    });
+                } catch (err) {}
+
+                if (!html) {
+                    container.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 20px;">Inga träffar för "${query}".</div>`;
+                } else {
+                    container.innerHTML = html;
+                }
+            }, 300);
+        }
+
+        async function fetchMediaDetails(id, mediaType, selectedSeasonIdx = 0) {
+            closeSearchModal();
+            hideAllViews();
+            document.getElementById('detail-view').style.display = 'block';
+            const container = document.getElementById('detail-items-container');
+            container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">Hämtar avsnitt...</div>';
+
+            try {
+                if (mediaType === 'tv') {
+                    const tvShow = await fetchTMDB(`/tv/${id}?api_key=${TMDB_API_KEY}&language=sv-SE`);
+                    currentMediaCache = { tvShow, mediaType: 'tv' };
+
+                    document.getElementById('detail-page-title').innerText = tvShow.name;
+                    document.getElementById('detail-page-subtitle').innerText = `${tvShow.networks?.[0]?.name || 'TV-serie'} • ${tvShow.number_of_seasons} säsonger`;
+                    document.getElementById('detail-section-heading').innerText = "Avsnitt per säsong";
+
+                    const validSeasons = (tvShow.seasons || []).filter(s => s.season_number >= 0);
+                    const tabsContainer = document.getElementById('season-tabs-container');
+                    tabsContainer.style.display = 'flex';
+                    let tabsHtml = '';
+                    validSeasons.forEach((season, idx) => {
+                        tabsHtml += `<button class="season-tab ${idx === selectedSeasonIdx ? 'active' : ''}" onclick="fetchSeasonEpisodes('${id}', ${season.season_number}, ${idx})">${season.name}</button>`;
+                    });
+                    tabsContainer.innerHTML = tabsHtml;
+
+                    if (validSeasons.length > 0) {
+                        await fetchSeasonEpisodes(id, validSeasons[selectedSeasonIdx].season_number, selectedSeasonIdx);
+                    }
+                } else {
+                    const movie = await fetchTMDB(`/movie/${id}?api_key=${TMDB_API_KEY}&language=sv-SE`);
+                    document.getElementById('detail-page-title').innerText = movie.title;
+                    document.getElementById('detail-page-subtitle').innerText = `Film • ${movie.release_date || 'Okänt datum'}`;
+                    document.getElementById('detail-section-heading').innerText = "Filmvisning";
+                    document.getElementById('season-tabs-container').style.display = 'none';
+
+                    const releaseDate = movie.release_date || todayDateStr;
+                    container.innerHTML = `
+                        <div class="detail-item-card">
+                            <div class="detail-item-info">
+                                <h4>${movie.title} (Film)</h4>
+                                <p>Biograf / Streaming • Premiär: ${releaseDate}</p>
+                            </div>
+                            <button class="add-plus-btn" onclick="addItemToCalendar('${movie.title}', 'Film', 'Film', '${releaseDate}')" title="Lägg till">+</button>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                container.innerHTML = `<div style="color: var(--accent); text-align: center; padding: 20px;">Ett fel uppstod.</div>`;
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function fetchSeasonEpisodes(tvId, seasonNumber, tabIdx) {
+            document.querySelectorAll('.season-tab').forEach((tab, idx) => {
+                tab.classList.toggle('active', idx === tabIdx);
+            });
+            const container = document.getElementById('detail-items-container');
+            container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">Hämtar avsnitt...</div>';
+
+            try {
+                const seasonData = await fetchTMDB(`/tv/${tvId}/season/${seasonNumber}?api_key=${TMDB_API_KEY}&language=sv-SE`);
+                const showTitle = currentMediaCache?.tvShow?.name || 'Serie';
+
+                let html = '';
+                (seasonData.episodes || []).forEach(ep => {
+                    const epDate = ep.air_date || todayDateStr;
+                    const itemTitle = `${showTitle} - S${String(seasonNumber).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}: ${ep.name}`;
+                    html += `
+                        <div class="detail-item-card">
+                            <div class="detail-item-info">
+                                <h4>Avsnitt ${ep.episode_number}: ${ep.name}</h4>
+                                <p>Släppt • ${epDate}</p>
+                            </div>
+                            <button class="add-plus-btn" onclick="addItemToCalendar('${itemTitle}', 'Streaming', 'Serie', '${epDate}')" title="Lägg till">+</button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = `<div style="color: var(--accent); text-align: center; padding: 20px;">Kunde inte ladda avsnitt.</div>`;
+            }
+        }
+
+        function addItemToCalendar(title, channel, type, targetDate = todayDateStr) {
+            if (!calendarData[targetDate]) calendarData[targetDate] = [];
+            calendarData[targetDate].push({
+                id: 'item_' + Date.now() + Math.random().toString(36).substring(2, 5),
+                title, channel, type
+            });
+            saveData();
+            renderCalendar();
+            alert(`Tillagt i kalendern för datum ${targetDate}!`);
+        }
+
+        function toggleMenu(event, itemId) {
+            event.stopPropagation();
+            document.querySelectorAll('.menu-dropdown').forEach(m => {
+                if (m.id !== `menu-${itemId}`) m.classList.remove('show');
+            });
+            document.getElementById(`menu-${itemId}`).classList.toggle('show');
+        }
+
+        window.onclick = function() {
+            document.querySelectorAll('.menu-dropdown').forEach(m => m.classList.remove('show'));
+        };
+
+        function deleteItem(dateStr, itemId) {
+            calendarData[dateStr] = calendarData[dateStr].filter(item => item.id !== itemId);
+            saveData();
+            renderCalendar();
+        }
+
+        function moveItem(currentDateStr, itemId, destination) {
+            let targetDate = currentDateStr;
+            let d = new Date(currentDateStr);
+            if (destination === 'tomorrow') {
+                d.setDate(d.getDate() + 1);
+                targetDate = d.toISOString().split('T')[0];
+            } else if (destination === 'nextweek') {
+                d.setDate(d.getDate() + 7);
+                targetDate = d.toISOString().split('T')[0];
+            }
+
+            let itemToMove = null;
+            calendarData[currentDateStr] = calendarData[currentDateStr].filter(item => {
+                if (item.id === itemId) { itemToMove = item; return false; }
+                return true;
+            });
+
+            if (itemToMove) {
+                if (!calendarData[targetDate]) calendarData[targetDate] = [];
+                calendarData[targetDate].push(itemToMove);
+                saveData();
+                renderCalendar();
+            }
+        }
+
+        function openDateModalFor(dateStr, itemId) {
+            activeItemId = { dateStr, itemId };
+            document.getElementById('date-modal').classList.add('show');
+        }
+
+        function closeDateModal() {
+            document.getElementById('date-modal').classList.remove('show');
+            activeItemId = null;
+        }
+
+        function confirmMoveToDate(newDateStr) {
+            if (!activeItemId || !newDateStr) return;
+            const { dateStr, itemId } = activeItemId;
+            let itemToMove = null;
+            calendarData[dateStr] = calendarData[dateStr].filter(item => {
+                if (item.id === itemId) { itemToMove = item; return false; }
+                return true;
+            });
+
+            if (itemToMove) {
+                if (!calendarData[newDateStr]) calendarData[newDateStr] = [];
+                calendarData[newDateStr].push(itemToMove);
+                saveData();
+                renderCalendar();
+            }
+            closeDateModal();
+        }
+
+        let draggedItemInfo = null;
+        function handleDragStart(event, dateStr, itemId) { draggedItemInfo = { dateStr, itemId }; }
+        function allowDrop(event) { event.preventDefault(); }
+        function handleDrop(event, targetDateStr) {
+            event.preventDefault();
+            if (!draggedItemInfo) return;
+            const { dateStr: sourceDateStr, itemId } = draggedItemInfo;
+            if (sourceDateStr === targetDateStr) return;
+
+            let itemToMove = null;
+            calendarData[sourceDateStr] = calendarData[sourceDateStr].filter(item => {
+                if (item.id === itemId) { itemToMove = item; return false; }
+                return true;
+            });
+
+            if (itemToMove) {
+                if (!calendarData[targetDateStr]) calendarData[targetDateStr] = [];
+                calendarData[targetDateStr].push(itemToMove);
+                saveData();
+                renderCalendar();
+            }
+            draggedItemInfo = null;
+        }
+
+        window.onload = function() {
+            let d = new Date();
+            let day = d.getDay();
+            let diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            currentStartDate = new Date(d.setDate(diff));
+            updateWeekHeader();
+            renderCalendar();
+        };
+    </script>
+    <script src="/bellaswahn/app-v2.js?v=1"></script>
+</body>
+</html>
