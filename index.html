@@ -2,117 +2,380 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <title>NextWeek</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            --bg: #0b0b0f;
-            --c: #16161f;
-            --b: #2c2c3a;
-            --t: #fff;
-            --m: #9a9aae;
-            --a: #ff3b30;
+            --bg-color: #0b0f17;
+            --card-bg: #121824;
+            --card-hover: #1a2233;
+            --accent: #ff3b30;
+            --text-main: #ffffff;
+            --text-muted: #9a9aae;
+            --border: #2c2c3a;
+        }
+
+        * {
             box-sizing: border-box;
-            padding-top: env(safe-area-inset-top, 0px);
-        }
-        @media(prefers-color-scheme:light){
-            :root:not([data-theme=dark]){--bg:#f3f3f8;--c:#fff;--b:#dcdce6;--t:#111;--m:#666}
-        }
-        html, body {
             margin: 0;
-            height: 100%;
-        }
-        body {
+            padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--t);
-            padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 90px;
             -webkit-font-smoothing: antialiased;
         }
-        .card {
-            background: var(--c);
-            border: 1px solid var(--b);
-            border-radius: 14px;
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background-color: var(--bg-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-color: var(--accent);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+        }
+
+        .brand-title {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .brand-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .search-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .search-btn:hover {
+            color: var(--text-main);
+            border-color: var(--accent);
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        #search-container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 10px 16px;
+            display: none;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+        }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #sr {
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            top: 75px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        #sr div {
             padding: 12px 14px;
-            margin: 10px 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        #sr div:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        #sr small, .m {
+            color: var(--text-muted);
+        }
+
+        .day-card, .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             display: flex;
             gap: 10px;
             align-items: center;
         }
-        .card .g { flex: 1; min-width: 0; }
-        .card small { display: block; color: var(--m); }
-        .day { border-radius: 12px; padding: 2px 0; min-height: 40px; }
-        .day.over { outline: 2px dashed var(--a); }
-        h3 { margin: 16px 0 6px; font-size: 13px; color: var(--m); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .card .g {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card small {
+            display: block;
+            color: var(--text-muted);
+        }
+
+        .day {
+            border-radius: 12px;
+            padding: 2px 0;
+            min-height: 40px;
+        }
+
+        .day.over {
+            outline: 2px dashed var(--accent);
+        }
+
+        h3 {
+            margin: 16px 0 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+
+        .day-title-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .day-title {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .today-badge {
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .day-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .add-item-btn {
+            background: var(--card-hover);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .add-item-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .item {
+            background-color: #161f30;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 8px;
+            width: 100%;
+        }
+
         .h { color: #ff4d6d; }
-        .hd { cursor: grab; touch-action: none; color: var(--m); font-size: 18px; padding-right: 4px; }
+        .hd { cursor: grab; touch-action: none; color: var(--text-muted); font-size: 18px; padding-right: 4px; }
         .drag { opacity: .5; }
-        .menu { display: flex; gap: 6px; flex-wrap: wrap; margin: -4px 0 10px; }
-        .menu button { font-size: 12px; background: var(--c); border: 1px solid var(--b); border-radius: 8px; padding: 6px 10px; color: var(--t); cursor: pointer; }
-        .lk { color: #ff3b30; cursor: pointer; text-decoration: none; }
-        .lk:hover { text-decoration: underline; }
-        details { background: var(--c); border: 1px solid var(--b); border-radius: 12px; padding: 10px 14px; margin: 8px 0; }
-        summary { cursor: pointer; padding: 2px 0; font-weight: 600; }
-        .ep { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--b); font-size: 14px; }
+        
+        .menu {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: -4px 0 10px;
+        }
+
+        .menu button {
+            font-size: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .lk {
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .lk:hover {
+            text-decoration: underline;
+        }
+
+        details {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin: 8px 0;
+            width: 100%;
+        }
+
+        summary {
+            cursor: pointer;
+            padding: 2px 0;
+            font-weight: 600;
+        }
+
+        .ep {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 6px 0;
+            border-top: 1px solid var(--border);
+            font-size: 14px;
+        }
+
         .ep span { flex: 1; }
-        .note { font-size: 12px; color: var(--m); margin-top: 16px; }
-        #sr { position: absolute; left: 16px; right: 16px; top: 70px; background: var(--c); border: 1px solid var(--b); border-radius: 12px; overflow: hidden; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        #sr div { padding: 12px 14px; border-bottom: 1px solid var(--b); cursor: pointer; }
-        #sr div:hover { background: rgba(255,255,255,0.03); }
-        #sr small, .m { color: var(--m); }
+        .note { font-size: 12px; color: var(--text-muted); margin-top: 16px; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(11, 15, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item.on, .nav-item:hover {
+            color: var(--accent);
+        }
+
+        .nav-icon { font-size: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- Header med sökikon och NextWeek-profil -->
-    <header class="w-full bg-[#0b0f17] border-b border-[#2c2c3a] py-4 px-6 md:px-12 flex items-center justify-between sticky top-0 z-50">
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-red-600 flex items-center justify-center text-white shadow-md shadow-red-950/40">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-            </div>
-            <div class="flex flex-col">
-                <h1 class="text-lg md:text-xl font-bold tracking-tight text-white leading-tight">
-                    NextWeek
-                </h1>
-                <span class="text-slate-400 text-xs">Veckoöversikt & Sport</span>
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">📅</div>
+            <div>
+                <h1 class="brand-title">NextWeek</h1>
+                <span class="brand-sub">Veckoöversikt & Sport</span>
             </div>
         </div>
-        
-        <!-- Sökknapp som fäller ut / sätter fokus på sökfältet -->
-        <div class="flex items-center relative">
-            <button onclick="toggleSearch()" class="bg-[#151b28] hover:bg-[#1e2738] text-slate-300 hover:text-white p-2.5 rounded-full transition-colors flex items-center justify-center border border-slate-800/60 shadow-sm" aria-label="Sök">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </button>
+        <div>
+            <button class="search-btn" onclick="toggleSearch()" title="Sök">🔍</button>
         </div>
     </header>
 
-    <!-- Sökfält som döljs/visas vid behov eller placeras snyggt -->
-    <div id="search-container" class="px-4 md:px-6 pt-3 max-w-2xl mx-auto" style="display:none;">
+    <div id="search-container">
         <input id="q" placeholder="Sök serie, film, lag, liga…" autocomplete="off">
     </div>
     <div id="sr" hidden></div>
 
-    <!-- Huvudinnehåll -->
-    <main id="m" class="max-w-2xl mx-auto px-4 md:px-6 pt-2"></main>
+    <div class="container" id="m"></div>
 
-    <!-- Fast bottennavigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-[#0b0f17]/95 backdrop-blur-md border-t border-[#2c2c3a] py-2.5 px-6 flex justify-around items-center z-50 text-[11px] text-[#9a9aae]">
-        <button data-a="tab" data-v="week" class="flex flex-col items-center gap-1 hover:text-white transition-colors py-1">
-            <span class="text-lg">📅</span>
+    <nav class="bottom-nav">
+        <button class="nav-item" data-a="tab" data-v="week">
+            <span class="nav-icon">📅</span>
             <span>Vecka</span>
         </button>
-        <button data-a="tab" data-v="sport" class="flex flex-col items-center gap-1 hover:text-white transition-colors py-1">
-            <span class="text-lg">⚽</span>
+        <button class="nav-item" data-a="tab" data-v="sport">
+            <span class="nav-icon">⚽</span>
             <span>Sport</span>
         </button>
-        <button data-a="tab" data-v="fav" class="flex flex-col items-center gap-1 hover:text-white transition-colors py-1">
-            <span class="text-lg">❤️</span>
+        <button class="nav-item" data-a="tab" data-v="fav">
+            <span class="nav-icon">❤️</span>
             <span>Favoriter</span>
         </button>
     </nav>
@@ -128,15 +391,12 @@
         
         let seed = 7; const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
 
-        // ---- Data (Ligor & Spelscheman) ----
+        // ---- Sport- och Ligadata ----
         const LG = [
             ['pl','Premier League','⚽','Viaplay · Prime Video','Arsenal,Aston Villa,Bournemouth,Brentford,Brighton,Chelsea,Coventry,Crystal Palace,Everton,Fulham,Hull,Ipswich,Leeds,Liverpool,Man City,Man United,Newcastle,Nottm Forest,Sunderland,Tottenham'],
             ['ch','Championship','⚽','Viaplay','Leeds,Leicester,Southampton,Norwich,Sunderland,Burnley'],
             ['al','Allsvenskan','⚽','C More · TV4','Malmö FF,AIK,Djurgården,Hammarby,IFK Göteborg,Häcken,Elfsborg,Mjällby'],
             ['cl','Champions League','⚽','TV4 · Max','Real Madrid,Barcelona,Bayern,PSG,Inter,Arsenal,Liverpool,Dortmund'],
-            ['bl','Bundesliga','⚽','Viaplay','Bayern,Dortmund,Leverkusen,Leipzig,Frankfurt,Stuttgart'],
-            ['ll','La Liga','⚽','Viaplay','Real Madrid,Barcelona,Atlético,Sevilla,Villarreal,Girona'],
-            ['sa','Serie A','⚽','TV4 · Max','Inter,Milan,Juventus,Napoli,Roma,Lazio'],
             ['nh','NHL','🏒','Viaplay · V Sport','Rangers,Bruins,Oilers,Maple Leafs,Avalanche,Panthers'],
             ['nf','NFL','🏈','Viaplay · V Sport','Chiefs,Eagles,49ers,Cowboys,Bills,Ravens'],
             ['nb','NBA','🏀','Viaplay · V Sport','Lakers,Celtics,Warriors,Knicks,Nuggets,Bucks'],
@@ -147,7 +407,17 @@
         const PLV = 'Viaplay', PRM = 'Prime Video';
         
         [['10-10','13:30','Arsenal','Leeds',PRM],['10-10','16:00','Sunderland','Brighton',PLV],['10-10','16:00','Aston Villa','Brentford',PLV],['10-10','16:00','Chelsea','Bournemouth',PLV],['10-10','16:00','Ipswich','Fulham',PLV],['10-10','18:30','Man United','Tottenham',PLV],
-        ['10-11','15:00','Crystal Palace','Nottm Forest',PLV],['10-11','15:00','Hull','Everton',PLV],['10-11','17:30','Liverpool','Man City',PLV],['10-12','21:00','Coventry','Newcastle',PLV],
-        ['10-17','13:30','Everton','Chelsea',PRM],['10-17','16:00','Man City','Ipswich',PLV],['10-17','16:00','Brentford','Liverpool',PLV],['10-17','16:00','Fulham','Hull',PLV],['10-17','18:30','Newcastle','Aston Villa',PLV],
-        ['10-18','15:00','Leeds','Man United',PLV],['10-18','15:00','Bournemouth','Sunderland',PLV],['10-18','15:00','Brighton','Crystal Palace',PLV],['10-18','17:30','Nottm Forest','Arsenal',PLV],['10-19','21:00','Tottenham','Coventry',PLV]]
-        .forEach(x => FX.push({lg
+        ['10-11','15:00','Crystal Palace','Nottm Forest',PLV],['10-11','15:00','Hull','Everton',PLV],['10-11','17:30','Liverpool','Man City',PLV],['10-12','21:00','Coventry','Newcastle',PLV]]
+        .forEach(x => FX.push({lg:'pl', d:'2026-'+x[0], t:x[1], h:x[2], a:x[3], c:x[4]}));
+
+        LG.forEach(l => {
+            if(l[0] == 'pl') return;
+            const tm = l[4] ? l[4].split(',') : [];
+            if(!tm.length) { ['USA GP','Mexikos GP'].forEach((r,i) => FX.push({lg:l[0], h:r, a:'', d:add(today,3+i*7), t:'21:00'})); return; }
+            for(let w=0; w<3; w++) {
+                const s = tm.slice().sort(() => rnd()-.5);
+                for(let i=0; i+1<s.length; i+=2) FX.push({lg:l[0], h:s[i], a:s[i+1], d:add(today, w*7 + Math.floor(rnd()*5)), t:TM[Math.floor(rnd()*TM.length)]});
+            }
+        });
+        FX.sort((x,y) => x.d.localeCompare(y.d) || x.t.localeCompare(y.t));
+        const LGM = Object.fromEntries(LG.map
