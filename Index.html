@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextWeek</title>
+    <style>
+        :root {
+            --bg-color: #0b0f17;
+            --card-bg: #121824;
+            --card-hover: #1a2233;
+            --accent: #ff3b30;
+            --text-main: #ffffff;
+            --text-muted: #9a9aae;
+            --border: #2c2c3a;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background-color: var(--bg-color); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
+        .logo-area { display: flex; align-items: center; cursor: pointer; }
+        .brand-text-logo { font-size: 22px; font-weight: 800; font-style: italic; letter-spacing: -0.5px; display: flex; align-items: baseline; line-height: 1; }
+        .brand-text-next { color: #ffffff; }
+        .brand-text-week { color: var(--accent); }
+        .search-btn { background-color: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .search-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .container { max-width: 650px; margin: 0 auto; padding: 20px 16px; }
+        .week-nav { display: flex; justify-content: space-between; align-items: center; background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; margin-bottom: 20px; }
+        .week-nav-title { font-size: 14px; font-weight: 600; }
+        .nav-arrow-btn { background: var(--card-hover); border: 1px solid var(--border); color: var(--text-main); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .nav-arrow-btn:hover { border-color: var(--accent); color: var(--accent); }
+        #search-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(11, 15, 23, 0.95); backdrop-filter: blur(12px); z-index: 200; display: none; flex-direction: column; padding: 20px; align-items: center; justify-content: flex-start; }
+        .search-content-wrapper { max-width: 650px; width: 100%; display: flex; flex-direction: column; height: 100%; }
+        .search-header-row { display: flex; gap: 12px; align-items: center; width: 100%; margin-bottom: 20px; }
+        #modal-search-input { flex: 1; padding: 14px 18px; background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; color: var(--text-main); outline: none; font-size: 16px; }
+        .close-search-btn { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 8px; }
+        .search-results-box { width: 100%; overflow-y: auto; flex: 1; padding-bottom: 40px; }
+        .day-card, .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .day-card { display: block; transition: border-color 0.2s; }
+        .day-card.is-today { border-color: rgba(255, 59, 48, 0.6); }
+        .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .day-title { font-size: 15px; font-weight: 700; }
+        .today-badge { background: var(--accent); color: white; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-left: 8px; }
+        .day-date { font-size: 12px; color: var(--text-muted); margin-left: 8px; }
+        .action-btn { background: var(--card-hover); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; }
+        .action-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(255, 59, 48, 0.1); }
+        .action-btn.added { background: rgba(46, 204, 113, 0.15); border-color: #2ecc71; color: #2ecc71; }
+        .item { background-color: #161f30; border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; align-items: flex-start; justify-content: space-between; margin-top: 8px; user-select: none; position: relative; }
+        .item-content { flex: 1; }
+        .menu-container { position: relative; margin-left: 8px; }
+        .menu-dots-btn { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 0 4px; }
+        .menu-dots-btn:hover { color: var(--text-main); }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 24px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); z-index: 50; width: 190px; overflow: hidden; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item { padding: 10px 12px; font-size: 13px; color: var(--text-main); background: none; border: none; width: 100%; text-align: left; display: block; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .dropdown-item:last-child { border-bottom: none; color: var(--accent); }
+        .dropdown-item:hover { background: var(--card-hover); }
+        .dropdown-date-input { display: none; width: calc(100% - 20px); margin: 6px 10px 10px 10px; padding: 6px; background: var(--bg-color); border: 1px solid var(--border); border-radius: 6px; color: white; font-size: 12px; outline: none; }
+        .dropdown-date-input.show { display: block; }
+        .sub-days-menu { display: none; background: var(--card-hover); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .sub-days-menu.show { display: block; }
+        .sub-day-btn { padding: 8px 16px; font-size: 12px; color: var(--text-muted); background: none; border: none; width: 100%; text-align: left; cursor: pointer; display: block; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sub-day-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.03); }
+        .badge { background: rgba(255, 59, 48, 0.2); color: #ff6b63; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+        .empty-day { color: var(--text-muted); font-size: 13px; text-align: center; padding: 10px 0; font-style: italic; }
+        .lk { color: var(--accent); cursor: pointer; text-decoration: none; border: none; background: none; font-size: 14px; text-align: left; padding: 0; }
+        .lk:hover { text-decoration: underline; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(11, 15, 23, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 8px 0; z-index: 100; }
+        .nav-item { background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; cursor: pointer; padding: 4px 16px; pointer-events: auto; }
+        .nav-item.active { color: var(--accent); }
+        .nav-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .nav-cal { width: 22px; height: 22px; background: #0b0f17; border: 2px solid currentColor; border-radius: 5px; position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: 3px; }
+        .nc-top { display: flex; justify-content: space-between; width: 100%; }
+        .nc-peg { width: 3px; height: 3px; background: currentColor; border-radius: 1px; }
+        .nc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; flex: 1; background: currentColor; padding: 1px; border-radius: 2px; }
+        .nc-cell { background: #0b0f17; border-radius: 1px; }
+        .nc-cell.red { background: var(--accent); }
+        .nav-ball { width: 22px; height: 22px; border: 2px solid currentColor; border-radius: 50%; position: relative; overflow: hidden; background: #0b0f17; }
+        .nb-patch { position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: var(--accent); clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+        .nav-heart { width: 22px; height: 20px; position: relative; display: flex; align-items: center; justify-content: center; }
+        .nav-heart::before, .nav-heart::after { content: ""; position: absolute; top: 0; width: 12px; height: 18px; border-radius: 10px 10px 0 0; background: currentColor; }
+        .nav-heart::before { left: 11px; transform: rotate(-45deg); transform-origin: 0 100%; }
+        .nav-heart::after { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
+        .item { -webkit-touch-callout: none; -webkit-user-select: none; }
+        .item.dragging { opacity: 0.25; }
+        .drag-ghost { position: fixed; z-index: 1000; pointer-events: none; opacity: 0.92; transform: scale(1.03); box-shadow: 0 12px 28px rgba(0,0,0,0.6); border-color: var(--accent); margin: 0; }
+        .item.drop-before { box-shadow: 0 -3px 0 var(--accent); }
+        .item.drop-after { box-shadow: 0 3px 0 var(--accent); }
+        .day-card.drop-target { border-color: #2ecc71; background: rgba(46, 204, 113, 0.08); }
+        h3 { margin: 16px 0 6px; font-size: 13px; color: var(--text-muted); text-transform: uppercase; }
+        .round-header { font-size: 14px; font-weight: 700; color: var(--accent); margin: 16px 0 8px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-area" id="home-logo-btn">
+            <div class="brand-text-logo"><span class="brand-text-next">Next</span><span class="brand-text-week">Week</span></div>
+        </div>
+        <div><button class="search-btn" id="search-toggle-btn" title="Sök">🔍</button></div>
+    </header>
+
+    <div id="search-modal">
+        <div class="search-content-wrapper" id="search-content-wrapper">
+            <div class="search-header-row">
+                <input type="text" id="modal-search-input" placeholder="Sök serie eller film (t.ex. Stranger Things, Dune)..." autofocus>
+                <button class="close-search-btn" id="close-search-modal">Avbryt</button>
+            </div>
+            <div class="search-results-box" id="modal-search-results">
+                <div style="color: var(--text-muted); text-align: center; padding-top: 40px;">Börja skriva för att söka bland serier och filmer...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="main-container"></div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item" data-tab="vecka">
+            <div class="nav-icon"><div class="nav-cal"><div class="nc-top"><div class="nc-peg"></div><div class="nc-peg"></div></div><div class="nc-grid"><div class="nc-cell"></div><div class="nc-cell"></div><div class="nc-cell"></div><div class="nc-cell"></div><div class="nc-cell red"></div><div class="nc-cell"></div></div></div></div>
+            <span>Vecka</span>
+        </button>
+        <button class="nav-item" data-tab="sport">
+            <div class="nav-icon"><div class="nav-ball"><div class="nb-patch"></div></div></div>
+            <span>Sport</span>
+        </button>
+        <button class="nav-item" data-tab="favoriter">
+            <div class="nav-icon"><div class="nav-heart"></div></div>
+            <span>Favoriter</span>
+        </button>
+    </nav>
+
+    <script>
+        let cal = [{ id: 1, ic: '📺', k: 'Serie', t: 'Stranger Things: S5E1 Chapter One', s: 'Netflix', d: '2026-10-15' }];
+        let currentTab = 'vecka';
+        let selectedShow = null;
+        let showEpisodes = [];
+        let selectedMovie = null;
+        let currentWeekStart = new Date('2026-10-05');
+
+        const MOVIES = [
+            { title: 'Dune: Part Two', year: '2024', overview: 'Paul Atreides förenas med Chani och freemen.', stream: 'HBO Max', date: '2026-10-10' },
+            { title: 'Interstellar', year: '2014', overview: 'Ett gäng astronauter reser genom ett maskhål.', stream: 'Viaplay', date: '2026-10-11' }
+        ];
+
+
+        function formatDateStr(date) {
+            let year = date.getFullYear();
+            let month = String(date.getMonth() + 1).padStart(2, '0');
+            let day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function render() {
+            const container = document.getElementById('main-container');
+            container.innerHTML = '';
+
+            if (selectedMovie) {
+                container.innerHTML = `
+                    <button id="back-to-main" class="lk" style="margin-bottom:12px;">← Tillbaka</button>
+                    <h2>🎬 ${selectedMovie.title}</h2>
+                    <small style="color:var(--text-muted); display:block; margin-bottom:16px;">${selectedMovie.year}</small>
+                    <div class="card" style="display:block;">
+                        <h3 style="margin-top:0;">Handling</h3>
+                        <p style="font-size:14px; color:var(--text-muted); margin-bottom:16px; line-height:1.4;">${selectedMovie.overview}</p>
+                        <h3 style="margin-top:12px;">Streaming</h3>
+                        <div style="font-size:14px; margin: 8px 0 16px; color:var(--text-main);">📺 ${selectedMovie.stream}</div>
+                        <div style="border-top: 1px solid var(--border); padding-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-size: 12px; color: var(--text-muted);">Välj datum för kalendern:</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="date" id="movie-date-input" value="${selectedMovie.date}" style="padding: 8px; background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px; color: white; outline: none;">
+                                <button class="action-btn" id="add-movie-cal-btn" style="background: var(--accent); color: white; border: none;">Lägg till</button>
+                            </div>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            if (selectedShow) {
+                let seasonsHtml = '';
+                const seasons = [...new Set(showEpisodes.map(ep => ep.season))];
+                seasons.forEach(sNum => {
+                    const eps = showEpisodes.filter(ep => ep.season === sNum);
+                    seasonsHtml += `<div class="round-header">Säsong ${sNum}</div>`;
+                    seasonsHtml += eps.map(ep => {
+                        const itemTitle = `${selectedShow.name}: S${ep.season}E${ep.number} ${ep.name}`.replace(/"/g, '&quot;');
+                        const itemDate = ep.airdate || '2026-10-15';
+                        const isAdded = cal.some(item => item.t === itemTitle && item.d === itemDate);
+                        return `
+                            <div class="card">
+                                <div>
+                                    <div style="font-size:14px; font-weight:600;">S${ep.season}E${ep.number} – ${ep.name}</div>
+                                    <small style="color:var(--text-muted);">${ep.airdate || 'Datum saknas'} · 📺 ${(selectedShow.network && selectedShow.network.name) || (selectedShow.webChannel && selectedShow.webChannel.name) || 'Streaming'}</small>
+                                </div>
+                                <button class="action-btn add-cal-btn ${isAdded ? 'added' : ''}" data-title="${itemTitle}" data-sub="${(selectedShow.network && selectedShow.network.name) || (selectedShow.webChannel && selectedShow.webChannel.name) || 'Streaming'}" data-kind="Serie" data-date="${itemDate}">${isAdded ? '✅' : '➕'}</button>
+                            </div>`;
+                    }).join('');
+                });
+
+                container.innerHTML = `
+                    <button id="back-to-main" class="lk" style="margin-bottom:12px;">← Tillbaka</button>
+                    <h2>📺 ${selectedShow.name}</h2>
+                    <small style="color:var(--text-muted); display:block; margin-bottom:16px;">${selectedShow.genres ? selectedShow.genres.join(', ') : ''}</small>
+                    ${seasonsHtml}`;
+                return;
+            }
+
+            if (currentTab === 'vecka') {
+                let days = [];
+                let dayNames = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
+                let swedishMonths = ["jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
+                let curr = new Date(currentWeekStart);
+                let todayStr = '2026-10-09';
+
+                for (let i = 0; i < 7; i++) {
+                    let dStr = formatDateStr(curr);
+                    let dateDisplay = `${curr.getDate()} ${swedishMonths[curr.getMonth()]}.`;
+                    days.push({ name: dayNames[i], date: dateDisplay, dStr: dStr, isToday: dStr === todayStr });
+                    curr.setDate(curr.getDate() + 1);
+                }
+
+                container.innerHTML = `
+                    <div class="week-nav">
+                        <button class="nav-arrow-btn" id="prev-week-btn">←</button>
+                        <span class="week-nav-title">Vecka (${days[0].date} – ${days[6].date})</span>
+                        <button class="nav-arrow-btn" id="next-week-btn">→</button>
+                    </div>`;
+
+                days.forEach(day => {
+                    const dayItems = cal.filter(item => item.d === day.dStr);
+                    let itemsHtml = dayItems.length === 0 ? `<div class="empty-day">Inga aktiviteter</div>` : dayItems.map(i => `
+                        <div class="item" data-id="${i.id}">
+                            <div class="item-content">
+                                <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">${i.t}</div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span class="badge">${i.k || 'Aktivitet'}</span>
+                                    <span style="font-size: 12px; color: var(--text-muted);">${i.s}</span>
+                                </div>
+                            </div>
+                            <div class="menu-container">
+                                <button class="menu-dots-btn" data-menu-id="${i.id}">⋮</button>
+                                <div class="dropdown-menu" id="menu-${i.id}">
+                                    <button class="dropdown-item move-tomorrow" data-id="${i.id}">Imorgon</button>
+                                    <button class="dropdown-item move-next-week" data-id="${i.id}">Nästa vecka</button>
+                                    <button class="dropdown-item trigger-move-menu" data-id="${i.id}">Flytta till dag...</button>
+                                    <div class="sub-days-menu" id="sub-days-${i.id}">
+                                        ${days.map(d => `<button class="sub-day-btn move-to-specific-date" data-id="${i.id}" data-date="${d.dStr}">${d.name} (${d.date})</button>`).join('')}
+                                    </div>
+                                    <button class="dropdown-item trigger-date-picker" data-id="${i.id}">Annan dag...</button>
+                                    <input type="date" class="dropdown-date-input" id="date-input-${i.id}" data-id="${i.id}" value="${i.d}">
+                                    <button class="dropdown-item remove-item" data-id="${i.id}">Ta bort</button>
+                                </div>
+                            </div>
+                        </div>`).join('');
+
+                    const card = document.createElement('div');
+                    card.className = `day-card ${day.isToday ? 'is-today' : ''}`;
+                    card.dataset.date = day.dStr;
+                    card.innerHTML = `
+                        <div class="day-header">
+                            <div>
+                                <span class="day-title">${day.name}</span>
+                                ${day.isToday ? '<span class="today-badge">Idag</span>' : ''}
+                                <span class="day-date">${day.date}</span>
+                            </div>
+                        </div>
+                        <div>${itemsHtml}</div>`;
+                    container.appendChild(card);
+                });
+            } else if (currentTab === 'sport') {
+                container.innerHTML = `<h3>Sport</h3><div class="card"><div style="color:var(--text-muted);">Sport-API är borttaget för tillfället. Du kan lägga till egna aktiviteter via kalendern!</div></div>`;
+            } else if (currentTab === 'favoriter') {
+                container.innerHTML = `<h3>Favoriter</h3><div class="card"><div style="color:var(--text-muted);">Inga favoriter tillagda ännu.</div></div>`;
+            }
+
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.tab === currentTab && !selectedShow && !selectedMovie);
+            });
+        }
+
+        // ---------- TVmaze ----------
+        const TVMAZE = 'https://api.tvmaze.com';
+        let searchTimer = null, searchSeq = 0;
+
+        function searchMsg(text) {
+            return `<div style="color: var(--text-muted); text-align: center; padding-top: 40px;">${text}</div>`;
+        }
+
+        document.getElementById('modal-search-input').addEventListener('input', function() {
+            const query = this.value.trim();
+            const resultsBox = document.getElementById('modal-search-results');
+            clearTimeout(searchTimer);
+            if (!query) {
+                searchSeq++;
+                resultsBox.innerHTML = searchMsg('Börja skriva för att söka...');
+                return;
+            }
+            resultsBox.innerHTML = searchMsg('Söker...');
+            searchTimer = setTimeout(() => runSearch(query), 300);
+        });
+
+        async function runSearch(query) {
+            const seq = ++searchSeq;
+            const resultsBox = document.getElementById('modal-search-results');
+            let html = '';
+            let failed = false;
+
+            try {
+                const res = await fetch(`${TVMAZE}/search/shows?q=${encodeURIComponent(query)}`);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const shows = await res.json();
+                shows.slice(0, 8).forEach(s => {
+                    const year = s.show.premiered ? s.show.premiered.slice(0, 4) : '';
+                    html += `<div class="card search-click-show" data-id="${s.show.id}" style="cursor:pointer;"><span>📺 [Serie] ${s.show.name}${year ? ' (' + year + ')' : ''}</span><span style="color:var(--text-muted);">›</span></div>`;
+                });
+            } catch (e) {
+                failed = true;
+            }
+
+            if (seq !== searchSeq) return; // nyare sökning har tagit över
+
+            const q = query.toLowerCase();
+            MOVIES.forEach((m, idx) => {
+                if (m.title.toLowerCase().includes(q)) {
+                    html += `<div class="card search-click-movie" data-index="${idx}" style="cursor:pointer;"><span>🎬 [Film] ${m.title}</span><span style="color:var(--text-muted);">›</span></div>`;
+                }
+            });
+
+            if (failed) html = `<div style="color: var(--accent); text-align: center; padding: 12px 0; font-size: 13px;">Kunde inte nå TVmaze. Kontrollera internet.</div>` + html;
+            resultsBox.innerHTML = html || searchMsg('Inga träffar hittades.');
+        }
+
+        document.addEventListener('click', async e => {
+            const target = e.target;
+            const modal = document.getElementById('search-modal');
+
+            if (!target.closest('.menu-container') && !target.classList.contains('dropdown-date-input')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            }
+            if (modal.style.display === 'flex' && e.target === modal) {
+                modal.style.display = 'none';
+                return;
+            }
+
+            if (target.id === 'home-logo-btn' || target.closest('#home-logo-btn')) {
+                currentTab = 'vecka';
+                selectedShow = null;
+                selectedMovie = null;
+                render();
+            } else if (target.classList.contains('menu-dots-btn')) {
+                e.stopPropagation();
+                const menuId = target.dataset.menuId;
+                const menu = document.getElementById(`menu-${menuId}`);
+                document.querySelectorAll('.dropdown-menu').forEach(m => { if (m !== menu) m.classList.remove('show'); });
+                menu.classList.toggle('show');
+            } else if (target.classList.contains('move-tomorrow')) {
+                const id = Number(target.dataset.id);
+                const item = cal.find(i => i.id === id);
+                if (item) { let d = new Date(item.d); d.setDate(d.getDate() + 1); item.d = formatDateStr(d); render(); }
+            } else if (target.classList.contains('move-next-week')) {
+                const id = Number(target.dataset.id);
+                const item = cal.find(i => i.id === id);
+                if (item) { let d = new Date(item.d); d.setDate(d.getDate() + 7); item.d = formatDateStr(d); render(); }
+            } else if (target.classList.contains('trigger-move-menu')) {
+                e.stopPropagation();
+                document.getElementById(`sub-days-${target.dataset.id}`).classList.toggle('show');
+            } else if (target.classList.contains('move-to-specific-date')) {
+                const id = Number(target.dataset.id);
+                const item = cal.find(i => i.id === id);
+                if (item && target.dataset.date) { item.d = target.dataset.date; render(); }
+            } else if (target.classList.contains('trigger-date-picker')) {
+                e.stopPropagation();
+                const dateInput = document.getElementById(`date-input-${target.dataset.id}`);
+                dateInput.classList.toggle('show');
+                dateInput.focus();
+            } else if (target.classList.contains('remove-item')) {
+                cal = cal.filter(item => item.id !== Number(target.dataset.id));
+                render();
+            } else if (target.closest('.nav-item')) {
+                currentTab = target.closest('.nav-item').dataset.tab;
+                selectedShow = null; selectedMovie = null;
+                render();
+            } else if (target.id === 'prev-week-btn') {
+                currentWeekStart.setDate(currentWeekStart.getDate() - 7); render();
+            } else if (target.id === 'next-week-btn') {
+                currentWeekStart.setDate(currentWeekStart.getDate() + 7); render();
+            } else if (target.id === 'search-toggle-btn') {
+                modal.style.display = 'flex';
+                document.getElementById('modal-search-input').focus();
+            } else if (target.id === 'close-search-modal') {
+                modal.style.display = 'none';
+            } else if (target.closest('.search-click-show')) {
+                const showId = target.closest('.search-click-show').dataset.id;
+                document.getElementById('modal-search-results').innerHTML = searchMsg('Hämtar serie...');
+                try {
+                    const [res, epRes] = await Promise.all([
+                        fetch(`${TVMAZE}/shows/${showId}`),
+                        fetch(`${TVMAZE}/shows/${showId}/episodes`)
+                    ]);
+                    if (!res.ok || !epRes.ok) throw new Error('HTTP');
+                    selectedShow = await res.json();
+                    showEpisodes = await epRes.json();
+                    selectedMovie = null;
+                    modal.style.display = 'none'; render();
+                } catch (err) {
+                    document.getElementById('modal-search-results').innerHTML = searchMsg('Kunde inte hämta seriedata. Försök igen.');
+                }
+            } else if (target.closest('.search-click-movie')) {
+                const idx = Number(target.closest('.search-click-movie').dataset.index);
+                selectedMovie = MOVIES[idx];
+                selectedShow = null;
+                modal.style.display = 'none'; render();
+            } else if (target.id === 'back-to-main') {
+                selectedShow = null; selectedMovie = null;
+                render();
+            } else if (target.classList.contains('add-cal-btn')) {
+                const t = target.dataset.title, s = target.dataset.sub, d = target.dataset.date, k = target.dataset.kind;
+                const existingIndex = cal.findIndex(item => item.t === t && item.d === d);
+                if (existingIndex > -1) {
+                    cal.splice(existingIndex, 1);
+                    target.textContent = '➕';
+                    target.classList.remove('added');
+                } else {
+                    cal.push({ id: Date.now(), ic: '📺', k, t, s, d });
+                    target.textContent = '✅';
+                    target.classList.add('added');
+                }
+            } else if (target.id === 'add-movie-cal-btn') {
+                const title = selectedMovie.title;
+                const date = document.getElementById('movie-date-input').value;
+                const sub = selectedMovie.stream;
+                cal.push({ id: Date.now(), ic: '🎬', k: 'Film', t: title, s: sub, d: date });
+                alert('Filmen har lagts till i kalendern!');
+                selectedMovie = null;
+                render();
+            }
+        });
+
+        document.addEventListener('change', e => {
+            if (e.target.classList.contains('dropdown-date-input')) {
+                const id = Number(e.target.dataset.id);
+                const item = cal.find(i => i.id === id);
+                if (item && e.target.value) { item.d = e.target.value; render(); }
+            }
+        });
+
+        // ---------- Svep för att byta vecka + dra och släpp ----------
+        let drag = null, lpTimer = null, touchStart = null, scrollTimer = null, edgeTimer = 0;
+        const mc = document.getElementById('main-container');
+
+        function shiftWeek(n) { currentWeekStart.setDate(currentWeekStart.getDate() + n); render(); }
+
+        function startDrag(el, x, y) {
+            const id = Number(el.dataset.id);
+            const r = el.getBoundingClientRect();
+            const ghost = el.cloneNode(true);
+            ghost.classList.add('drag-ghost');
+            ghost.style.width = r.width + 'px';
+            ghost.style.left = r.left + 'px';
+            ghost.style.top = r.top + 'px';
+            document.body.appendChild(ghost);
+            el.classList.add('dragging');
+            drag = { id, ghost, offX: x - r.left, offY: y - r.top, dir: 0 };
+            if (navigator.vibrate) navigator.vibrate(15);
+            scrollTimer = setInterval(() => { if (drag && drag.dir) window.scrollBy(0, drag.dir * 10); }, 16);
+        }
+
+        function clearDropMarks() {
+            document.querySelectorAll('.day-card.drop-target').forEach(c => c.classList.remove('drop-target'));
+            document.querySelectorAll('.item.drop-before, .item.drop-after').forEach(c => c.classList.remove('drop-before', 'drop-after'));
+        }
+
+        // Hittar dag + position (före vilket objekt, eller sist) under fingret
+        function getDropTarget(x, y) {
+            const under = document.elementFromPoint(x, y);
+            const card = under && under.closest('.day-card');
+            if (!card) return null;
+            const items = [...card.querySelectorAll('.item:not(.dragging)')];
+            let before = null;
+            for (const el of items) {
+                const r = el.getBoundingClientRect();
+                if (y < r.top + r.height / 2) { before = el; break; }
+            }
+            return { card, before, last: items[items.length - 1] || null };
+        }
+
+        function moveDrag(x, y) {
+            drag.ghost.style.left = (x - drag.offX) + 'px';
+            drag.ghost.style.top = (y - drag.offY) + 'px';
+            clearDropMarks();
+            const tgt = getDropTarget(x, y);
+            if (tgt) {
+                tgt.card.classList.add('drop-target');
+                if (tgt.before) tgt.before.classList.add('drop-before');
+                else if (tgt.last) tgt.last.classList.add('drop-after');
+            }
+            drag.dir = y < 130 ? -1 : (y > window.innerHeight - 110 ? 1 : 0);
+            // dra vid kanten för att byta vecka
+            const now = Date.now();
+            if ((x < 28 || x > window.innerWidth - 28) && now - edgeTimer > 800) {
+                edgeTimer = now;
+                shiftWeek(x < 28 ? -7 : 7);
+            }
+        }
+
+        function cleanupDrag() {
+            clearInterval(scrollTimer);
+            if (drag) drag.ghost.remove();
+            clearDropMarks();
+            drag = null;
+        }
+
+        function endDrag(x, y) {
+            const tgt = getDropTarget(x, y);
+            const item = cal.find(i => i.id === drag.id);
+            if (tgt && tgt.card.dataset.date && item) {
+                const date = tgt.card.dataset.date;
+                const beforeId = tgt.before ? Number(tgt.before.dataset.id) : null;
+                cal = cal.filter(i => i.id !== item.id);
+                item.d = date;
+                let idx = -1;
+                if (beforeId !== null) idx = cal.findIndex(i => i.id === beforeId);
+                else {
+                    for (let n = cal.length - 1; n >= 0; n--) if (cal[n].d === date) { idx = n + 1; break; }
+                }
+                if (idx < 0) cal.push(item); else cal.splice(idx, 0, item);
+            }
+            cleanupDrag();
+            render();
+        }
+
+        mc.addEventListener('touchstart', e => {
+            const t = e.touches[0];
+            touchStart = { x: t.clientX, y: t.clientY };
+            const el = e.target.closest('.item');
+            if (el && currentTab === 'vecka' && !e.target.closest('.menu-container')) {
+                lpTimer = setTimeout(() => startDrag(el, t.clientX, t.clientY), 350);
+            }
+        }, { passive: true });
+
+        mc.addEventListener('touchmove', e => {
+            const t = e.touches[0];
+            if (drag) { e.preventDefault(); moveDrag(t.clientX, t.clientY); return; }
+            if (touchStart && (Math.abs(t.clientX - touchStart.x) > 8 || Math.abs(t.clientY - touchStart.y) > 8)) clearTimeout(lpTimer);
+        }, { passive: false });
+
+        mc.addEventListener('touchend', e => {
+            clearTimeout(lpTimer);
+            const t = e.changedTouches[0];
+            if (drag) { endDrag(t.clientX, t.clientY); touchStart = null; return; }
+            if (touchStart && currentTab === 'vecka' && !selectedShow && !selectedMovie) {
+                const dx = t.clientX - touchStart.x, dy = t.clientY - touchStart.y;
+                if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) shiftWeek(dx < 0 ? 7 : -7);
+            }
+            touchStart = null;
+        });
+
+        mc.addEventListener('touchcancel', () => { clearTimeout(lpTimer); if (drag) { cleanupDrag(); render(); } touchStart = null; });
+        mc.addEventListener('contextmenu', e => { if (e.target.closest('.item')) e.preventDefault(); });
+        // --------------------------------------------------------------
+
+        window.onload = function() { render(); };
+    </script>
+</body>
+</html>
